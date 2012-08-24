@@ -1,0 +1,15 @@
+This code is getting pretty old and it seems that it has some problems
+with modern versions of FLEX and Scheme.  Here are some things I
+discovered while debugging this in 2007.
+
+1.  Under Linux, you can generate the scanner like this:
+
+    flex --warn -i R2S.L
+    gcc lex.yy.c -lfl
+
+2.  For some reason, the DATE and TIME patterns are matching.
+    I don't understand this, but if you delete the patterns you can
+    get something working.
+
+3.  I've preprocessed the sample files.  The .s version is the
+    expected output.
