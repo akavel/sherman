@@ -36,7 +36,7 @@ MIT in each case. |#
 
 ;; mzscheme doesn't have these
 ;; (declare (usual-integrations)
-;;	    (integrate-external "object"))
+;;            (integrate-external "object"))
 
 ;;;; Operations
 
@@ -49,36 +49,36 @@ MIT in each case. |#
   (let ((entry (assq variable (car operations))))
 
     (if entry
-	(if (cdr entry)
-	    (if-found (cadr entry) (cddr entry))
-	    (if-not))
-	(let ((entry (assq variable (cdr operations))))
-	  (if entry
-	      (if-found (cadr entry) (cddr entry))
-	      (if-not))))))
+        (if (cdr entry)
+            (if-found (cadr entry) (cddr entry))
+            (if-not))
+        (let ((entry (assq variable (cdr operations))))
+          (if entry
+              (if-found (cadr entry) (cddr entry))
+              (if-not))))))
 
 (define (operations/shadow operations variables)
   (cons (map* (car operations)
-	      (lambda (variable) (cons variable false))
-	      variables)
-	(cdr operations)))
+              (lambda (variable) (cons variable false))
+              variables)
+        (cdr operations)))
 
 (define (operations/bind operations operation variable value)
   (cons (cons (cons* variable operation value)
-	      (car operations))
-	(cdr operations)))
+              (car operations))
+        (cdr operations)))
 
 (define (operations/bind-global operations operation variable value)
   (cons (car operations)
-	(cons (cons* variable operation value)
-	      (cdr operations))))
+        (cons (cons* variable operation value)
+              (cdr operations))))
 
 (define (operations/map-external operations procedure)
   (let loop ((elements (car operations)))
     (cond ((null? elements)
-	   '())
-	  ((cdar elements)
-	   (cons (procedure (cadar elements) (caar elements) (cddar elements))
-		 (loop (cdr elements))))
-	  (else
-	   (loop (cdr elements))))))
+           '())
+          ((cdar elements)
+           (cons (procedure (cadar elements) (caar elements) (cddar elements))
+                 (loop (cdr elements))))
+          (else
+           (loop (cdr elements))))))
