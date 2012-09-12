@@ -63,24 +63,24 @@
   (if (stream/empty? stream)
       stream
       (stream/cons (f (stream/car stream))
-		   (stream/map (stream/cdr stream) f))))
+                   (stream/map (stream/cdr stream) f))))
 
 (define (stream/for-each stream f)
   (if (not (stream/empty? stream))
       (begin (f (stream/car stream))
-	     (stream/for-each (stream/cdr stream) f))))
+             (stream/for-each (stream/cdr stream) f))))
 
 (define (stream/filter stream predicate)
   (if (stream/empty? stream) 
       stream
       (let ((this-element (stream/car stream)))
-	(if (predicate this-element)
-	    (stream/cons this-element (stream/filter (stream/cdr stream) predicate))
-	    (stream/filter (stream/cdr stream) predicate)))))
+        (if (predicate this-element)
+            (stream/cons this-element (stream/filter (stream/cdr stream) predicate))
+            (stream/filter (stream/cdr stream) predicate)))))
 
 (define (stream/foldl f init stream)
   (if (stream/empty? stream)
       init
       (stream/foldl f 
-		    (f init (stream/car stream))
-		    (stream/cdr stream))))
+                    (f init (stream/car stream))
+                    (stream/cdr stream))))

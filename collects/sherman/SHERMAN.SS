@@ -75,8 +75,8 @@
 (define (definition? thing)
   (and (symbol? thing)
        (let ((pname (symbol->string thing)))
-	 (char=? (string-ref pname (-1+ (string-length pname)))
-		 #\:))))
+         (char=? (string-ref pname (-1+ (string-length pname)))
+                 #\:))))
 
 (define (fetch/base-name definition)
   (let ((pname (symbol->string definition)))
@@ -85,8 +85,8 @@
 (define (fetch? thing)
   (and (symbol? thing)
        (let ((pname (symbol->string thing)))
-	 (char=? (string-ref pname 0)
-		 #\:))))
+         (char=? (string-ref pname 0)
+                 #\:))))
 
 (define (self-evaluating? thing)
   (or (null? thing)
@@ -104,7 +104,7 @@
 (define (maybe-bind-break inner)
   (if (free-variable? 'break inner)
       (let ((break (gensym)))
-	`(#%CALL-WITH-CURRENT-CONTINUATION
+        `(#%CALL-WITH-CURRENT-CONTINUATION
            (#%LAMBDA (,break)
               (#%LET ((BREAK (#%LAMBDA () (,break #f))))
                      ,inner))))
@@ -113,7 +113,7 @@
 (define (sequence? thing)
   (and (pair? thing)
        (or (eq? (car thing) 'BEGIN)
-	   (eq? (car thing) '#%BEGIN))))
+           (eq? (car thing) '#%BEGIN))))
 
 (define sequence-elements cdr)
 
@@ -137,34 +137,34 @@
 
 (define (for/make name start end step body)
   (let ((loop  (gensym))
-	(stemp (gensym))
-	(steptemp (gensym))
-	(etemp (gensym))
-	)
+        (stemp (gensym))
+        (steptemp (gensym))
+        (etemp (gensym))
+        )
     (maybe-bind-break
      `(#%LET ((,stemp ,start)
-	      (,etemp ,end)
-	      (,steptemp ,step)
-	      )
-	   (#%LET ,loop ((,name ,stemp))
-	      (#%IF (#%<= ,name ,etemp)
-		    (#%BEGIN ,body
-			     (,loop (#%+ ,name ,steptemp)))))))))
+              (,etemp ,end)
+              (,steptemp ,step)
+              )
+           (#%LET ,loop ((,name ,stemp))
+              (#%IF (#%<= ,name ,etemp)
+                    (#%BEGIN ,body
+                             (,loop (#%+ ,name ,steptemp)))))))))
 
 (define (foreach/make name series body)
   (let ((stemp (gensym))
-	(break (gensym))
-	(loop  (gensym))
-	(body (if (sequence? body)
-		  (sequence-elements body)
-		  (list body))))
+        (break (gensym))
+        (loop  (gensym))
+        (body (if (sequence? body)
+                  (sequence-elements body)
+                  (list body))))
     (maybe-bind-break
-	   `(#%LET ,loop ((,stemp ,series))
-		   (#%IF (TAIL? ,stemp)
-			 #f
-			 (#%LET ((,name (FIRST ,stemp)))
-				(#%BEGIN ,@body
-					 (,loop (NEXT ,stemp)))))))))
+           `(#%LET ,loop ((,stemp ,series))
+                   (#%IF (TAIL? ,stemp)
+                         #f
+                         (#%LET ((,name (FIRST ,stemp)))
+                                (#%BEGIN ,@body
+                                         (,loop (NEXT ,stemp)))))))))
 
 (define (lambda/make args body)
   ;; support use of RETURN
@@ -173,14 +173,14 @@
   ;; because there is no point in capturing the continuation if 
   ;; aren't planning on using it.  ~jrm
   (let ((body (if (sequence? body)
-		  (sequence-elements body)
-		  (list body))))
+                  (sequence-elements body)
+                  (list body))))
     `(#%LAMBDA ,args
-	       ,@(if (free-variable? 'return body)
-		   `((#%CALL-WITH-CURRENT-CONTINUATION
-		      (#%LAMBDA (RETURN)
-			       ,@body)))
-		   body))))
+               ,@(if (free-variable? 'return body)
+                   `((#%CALL-WITH-CURRENT-CONTINUATION
+                      (#%LAMBDA (RETURN)
+                               ,@body)))
+                   body))))
 
 (define (literal/make text)
   (if (symbol? text)
@@ -196,55 +196,55 @@
 
 (define (repeat/make name limit body)
   (let ((temp (gensym))
-	(loop (gensym)))
+        (loop (gensym)))
     (maybe-bind-break
     `(#%LET ,loop ((,name 1)
-	           (,temp ,limit))
-	  (#%if (#%not (#%> ,name ,temp))
+                   (,temp ,limit))
+          (#%if (#%not (#%> ,name ,temp))
                 (#%BEGIN ,body
-			 (,loop (#%+ ,name 1) ,temp)))))))
+                         (,loop (#%+ ,name 1) ,temp)))))))
 
 (define (too-few-arguments thing)
   `(#%ERROR "Too few arguments." (#%QUOTE ,thing)))
 
 (define (flatten-sequence elements)
   (apply append (map (lambda (element)
-		 (if (and (list? element)
-			  (eq? (car element) '#%BEGIN))
-		     (cdr element)
-		     (list element)))
-	       elements)))
+                 (if (and (list? element)
+                          (eq? (car element) '#%BEGIN))
+                     (cdr element)
+                     (list element)))
+               elements)))
 
 (define (sequence/make elements)
   (let ((contents (flatten-sequence
-		   (stream->list
-		    (stream/filter (list->stream elements)
-				   (complement self-evaluating?))))))
+                   (stream->list
+                    (stream/filter (list->stream elements)
+                                   (complement self-evaluating?))))))
     (if (null? contents)
-	'NONE
-	`(#%BEGIN ,@contents))))
+        'NONE
+        `(#%BEGIN ,@contents))))
 
 (define (top-level-block/make definitions body)
   `(#%BEGIN (#%DEFINE-VALUES ,(set->list definitions)
-	    (#%VALUES ,@(build-list (set/cardinality definitions)
-				  (lambda (n) #f))))
-	  ,body))
+            (#%VALUES ,@(build-list (set/cardinality definitions)
+                                  (lambda (n) #f))))
+          ,body))
 
 (define (until/make body)
   (let ((loop (gensym))
-	(result (gensym)))
+        (result (gensym)))
     (maybe-bind-break
     `(#%LET ,loop ((,result #f))
         (#%IF (#%NOT ,result)
-	      (,loop ,body)
-	      ,result)))))
+              (,loop ,body)
+              ,result)))))
 
 (define (use/make names body)
   `(#%LET ,(map (lambda (name) `(,name #f)) names) ,body))
 
 (define (while/make test body)
   (let ((loop (gensym))
-	(break (gensym)))
+        (break (gensym)))
     (maybe-bind-break `(#%LET ,loop ()
             (#%IF ,test
                 (#%BEGIN ,body (,loop)))))))
@@ -260,28 +260,28 @@
 (define (crsf infile outfile)
   (let ((input (load infile)))
     (if (and (pair? input)
-	     (eq? (car input) 'sherman)
-	     (block? (cadr input)))
-	(let ((result (compile-top-level (cadr input))))
-	  (with-output-to-file outfile
-	    (lambda ()
-	      (stream/for-each (list->stream (cdr result))
-			       (lambda (element)
-				 (newline)
-				 (pretty-print element))))
-	    'replace))
-	(error "File is not a sherman file." infile))))
+             (eq? (car input) 'sherman)
+             (block? (cadr input)))
+        (let ((result (compile-top-level (cadr input))))
+          (with-output-to-file outfile
+            (lambda ()
+              (stream/for-each (list->stream (cdr result))
+                               (lambda (element)
+                                 (newline)
+                                 (pretty-print element))))
+            'replace))
+        (error "File is not a sherman file." infile))))
 
 (define (scan-definitions block)
   (stream->set
    (stream/map
     (stream/filter (block->stream block)
-		   definition?)
+                   definition?)
     definition/base-name)))
 
 (define (compile-top-level block)
   (top-level-block/make (scan-definitions block) 
-			(compile-sequence block (operations/make) (environment/make))))
+                        (compile-sequence block (operations/make) (environment/make))))
 
 
 ;;; Environment hacking
@@ -299,10 +299,10 @@
 (define (environment/lookup environment variable if-found if-unknown if-not)
   (let ((association (assq variable environment)))
     (if association
-	(if (eq? (cdr association) *unknown-value)
-	    (if-unknown)
-	    (if-found (cdr association)))
-	(if-not))))
+        (if (eq? (cdr association) *unknown-value)
+            (if-unknown)
+            (if-found (cdr association)))
+        (if-not))))
 
 ;;; Declaration hacking
 ;;; A lot of this is lifted from MIT Scheme
@@ -311,10 +311,10 @@
 (define (define-declaration operation parser)
   (let ((entry (assq operation known-declarations)))
     (if entry
-	(set-cdr! entry parser)
-	(set! known-declarations
-	      (cons (cons operation parser)
-		    known-declarations)))))
+        (set-cdr! entry parser)
+        (set! known-declarations
+              (cons (cons operation parser)
+                    known-declarations)))))
 
 (define-struct decl
   (
@@ -334,13 +334,13 @@
       ((operations operations)
        (declarations declaration-set))
     (if (null? declarations)
-	operations
-	(loop (let ((declaration (car declarations)))
-		(operations/bind operations
-				 (decl-operation declaration)
-				 (decl-variable declaration)
-				 (decl-value declaration)))
-	      (cdr declarations)))))
+        operations
+        (loop (let ((declaration (car declarations)))
+                (operations/bind operations
+                                 (decl-operation declaration)
+                                 (decl-variable declaration)
+                                 (decl-value declaration)))
+              (cdr declarations)))))
 
 ;; This table transates infix operators into their prefix form.
 
@@ -401,19 +401,19 @@
 (define (parse-declaration declaration)
   (let ((operation (block/first declaration)))
     (cond ((eq? operation 'ARITY) 
-	   (list
-	    (make-decl 'TYPE
-		       (block/second declaration)
-		       `(PROCEDURE ,(block/third declaration)))))
-	  ((eq? operation 'standard-definitions)
-	   (map (lambda (spec)
-		  (apply make-decl spec)) standard-declarations))
-	  ((eq? operation 'type)
-	   (list
-	    (make-decl 'TYPE
-		       (block/second declaration)
-		       (block/third declaration))))
-	  (else (error "Unrecognized declaration." operation)))))
+           (list
+            (make-decl 'TYPE
+                       (block/second declaration)
+                       `(PROCEDURE ,(block/third declaration)))))
+          ((eq? operation 'standard-definitions)
+           (map (lambda (spec)
+                  (apply make-decl spec)) standard-declarations))
+          ((eq? operation 'type)
+           (list
+            (make-decl 'TYPE
+                       (block/second declaration)
+                       (block/third declaration))))
+          (else (error "Unrecognized declaration." operation)))))
 
 ;;; The heart of the compiler
 
@@ -426,29 +426,29 @@
 (define (infix-wrapper ctenv if-more if-done)
   (lambda (value new-operations rest)
     (let* ((peek (block/first rest))
-	   (entry (assq peek *infix-operators*))
-	   (infix-more
+           (entry (assq peek *infix-operators*))
+           (infix-more
              (lambda (rhvalue new-operations rest)
                (if-more (combination/make (cadr entry) (list value rhvalue)) new-operations rest)))
-	   (infix-done
-	     (lambda (rhvalue)
-	       (if-done (combination/make (cadr entry) (list value rhvalue))))))
+           (infix-done
+             (lambda (rhvalue)
+               (if-done (combination/make (cadr entry) (list value rhvalue))))))
 
 
       (if (eq? entry #f)
-	  (if-more value new-operations rest)
-	  (compile-one (block/rest rest) new-operations ctenv
-		       (infix-wrapper ctenv infix-more infix-done)
-		       infix-done)))))
+          (if-more value new-operations rest)
+          (compile-one (block/rest rest) new-operations ctenv
+                       (infix-wrapper ctenv infix-more infix-done)
+                       infix-done)))))
 
 
 (define (compile-sequence expr operations ctenv)
   (let ((combine-more     
-	 (lambda (value new-operations rest)
-	   (sequence/make (list value (compile-sequence rest new-operations ctenv))))))
+         (lambda (value new-operations rest)
+           (sequence/make (list value (compile-sequence rest new-operations ctenv))))))
     (compile-one expr operations ctenv
-		 (infix-wrapper ctenv combine-more identity-procedure)
-		 identity-procedure)))
+                 (infix-wrapper ctenv combine-more identity-procedure)
+                 identity-procedure)))
 
 (define (compile-one block operations ctenv if-more if-done)
 (display ".") (flush-output)
@@ -458,89 +458,89 @@
 
   (let ((d (block/first block)))
     (cond ((self-evaluating? d) 
-	   (compile-self-evaluating d
-				    (block/rest block) 
-				    operations 
-				    ctenv 
-				    ;; NO!
-				    ;; We want infix to associate to the left.
-				    ;;(infix-wrapper ctenv if-more if-done)
-				    if-more
-				    if-done))
+           (compile-self-evaluating d
+                                    (block/rest block) 
+                                    operations 
+                                    ctenv 
+                                    ;; NO!
+                                    ;; We want infix to associate to the left.
+                                    ;;(infix-wrapper ctenv if-more if-done)
+                                    if-more
+                                    if-done))
 
-	  ((block? d)
-	   (compile-block d (block/rest block)
-			  operations
-			  ctenv if-more if-done))
+          ((block? d)
+           (compile-block d (block/rest block)
+                          operations
+                          ctenv if-more if-done))
 
-	  ;; Parenthesized subexpressions
-	  ((list? d)
-	   (let ((value (compile-sequence (list->block d) operations ctenv)))
-	     (if (not (block/empty? (block/rest block)))
-		 ((infix-wrapper ctenv if-more if-done) value operations
-							(block/rest block))
-		 (if-done value))))
+          ;; Parenthesized subexpressions
+          ((list? d)
+           (let ((value (compile-sequence (list->block d) operations ctenv)))
+             (if (not (block/empty? (block/rest block)))
+                 ((infix-wrapper ctenv if-more if-done) value operations
+                                                        (block/rest block))
+                 (if-done value))))
 
-	  ((definition? d)
-	   (compile-definition d
-			       (block/rest block)
-			       operations
-			       ctenv
-			       (infix-wrapper ctenv if-more if-done)
-			       if-done))
+          ((definition? d)
+           (compile-definition d
+                               (block/rest block)
+                               operations
+                               ctenv
+                               (infix-wrapper ctenv if-more if-done)
+                               if-done))
 
-	  ((fetch? d)
-	   (compile-fetch d
-			  (block/rest block)
-			  operations
-			  ctenv
-			  (infix-wrapper ctenv if-more if-done)
-			  if-done))
+          ((fetch? d)
+           (compile-fetch d
+                          (block/rest block)
+                          operations
+                          ctenv
+                          (infix-wrapper ctenv if-more if-done)
+                          if-done))
 
-	  ;; DECLARE is a reserved word.
-	  ((declaration? d)
-	   (process-declaration (block/second  block)
-				(block/rest (block/rest block))
-				operations
-				ctenv
-				if-more if-done))
+          ;; DECLARE is a reserved word.
+          ((declaration? d)
+           (process-declaration (block/second  block)
+                                (block/rest (block/rest block))
+                                operations
+                                ctenv
+                                if-more if-done))
 
-	  ;; Kludge, finesse the multiple arity by checking for this special case. 
-	  ((and (eq? d 'make)
-		(not (block/empty? (block/rest block)))
-		(eq? (block/second block) 'function!))
-	   (compile-func d
-			 (block/third block)
-			 (block/fourth block)
-			 (block/rest (block/rest (block/rest (block/rest block))))
-			 operations
-			 ctenv
-			 if-more
-			 if-done))
+          ;; Kludge, finesse the multiple arity by checking for this special case. 
+          ((and (eq? d 'make)
+                (not (block/empty? (block/rest block)))
+                (eq? (block/second block) 'function!))
+           (compile-func d
+                         (block/third block)
+                         (block/fourth block)
+                         (block/rest (block/rest (block/rest (block/rest block))))
+                         operations
+                         ctenv
+                         if-more
+                         if-done))
 
-	  ;; FUNC is a reserved word.
-	  ((func? d)
-	   (compile-func d 
-			 (block/second block) 
-			 (block/third block)
-			 (block/rest (block/rest (block/rest block)))
-			 operations
-			 ctenv
-			 if-more
-			 if-done))
+          ;; FUNC is a reserved word.
+          ((func? d)
+           (compile-func d 
+                         (block/second block) 
+                         (block/third block)
+                         (block/rest (block/rest (block/rest block)))
+                         operations
+                         ctenv
+                         if-more
+                         if-done))
 
-	  ;; IF is a reserved word
-	  ((if? d)
-	   (compile-if (block/rest block) operations ctenv 
-		       (infix-wrapper ctenv if-more if-done)
-		       if-done))
+          ;; IF is a reserved word
+          ((if? d)
+           (compile-if (block/rest block) operations ctenv 
+                       (infix-wrapper ctenv if-more if-done)
+                       if-done))
 
-	  ((symbol? d) (check-function d 
-				       (block/rest block) 
-				       operations 
-				       ctenv
-				       if-more if-done))
-	  (else (error "Unrecognized element" d))))))
+          ((symbol? d) (check-function d 
+                                       (block/rest block) 
+                                       operations 
+                                       ctenv
+                                       if-more if-done))
+          (else (error "Unrecognized element" d))))))
 
 (define (compile-self-evaluating thing tail operations ctenv if-more if-done)
   (if (block/empty? tail)
@@ -552,24 +552,24 @@
   (define (descend-block b)
     (literal-block/make 
      (map (lambda (block-element)
-	    (if (block? block-element)
-		(descend-block block-element)
-		(literal/make block-element)))
-	  (block->list b))
+            (if (block? block-element)
+                (descend-block block-element)
+                (literal/make block-element)))
+          (block->list b))
      (compile-sequence b operations ctenv)))
 
   (let ((cb (descend-block b)))
     (if (block/empty? tail)
-	(if-done cb)
-	(if-more cb operations tail))))
+        (if-done cb)
+        (if-more cb operations tail))))
 
 (define (process-declaration declaration tail operations ctenv if-more if-done)
   (if (block/empty? tail)
       (if-done #f)
       (if-more #f
-	       (declarations/bind operations
-				  (parse-declaration declaration))
-	       tail)))
+               (declarations/bind operations
+                                  (parse-declaration declaration))
+               tail)))
 
 (define (compile-fetch f tail operations ctenv if-more if-done)
   (if (block/empty? tail)
@@ -582,224 +582,224 @@
 
   (define (generate-non-procedure)
     (if (block/empty? tail)
-	(if-done f)
-	(if-more f operations tail)))
+        (if-done f)
+        (if-more f operations tail)))
 
-  (define (generate-call-0)		;zero arguments
+  (define (generate-call-0)                ;zero arguments
     (if (block/empty? tail)
-	(if-done (combination/make f '()))
-	(if-more (combination/make f '()) operations tail)))
+        (if-done (combination/make f '()))
+        (if-more (combination/make f '()) operations tail)))
 
-  (define (generate-call-1)		;one argument
+  (define (generate-call-1)                ;one argument
     (let ((one-arg-more       
-	   (lambda (arg0 ctenv expr)
-	     (if-more (combination/make f (list arg0)) operations expr)))
-	  (one-arg-done
-	   (lambda (arg0)
-	     (if-done (combination/make f (list arg0))))))
+           (lambda (arg0 ctenv expr)
+             (if-more (combination/make f (list arg0)) operations expr)))
+          (one-arg-done
+           (lambda (arg0)
+             (if-done (combination/make f (list arg0))))))
       (compile-one tail operations ctenv
-		   (infix-wrapper ctenv one-arg-more one-arg-done)
-		   one-arg-done)))
+                   (infix-wrapper ctenv one-arg-more one-arg-done)
+                   one-arg-done)))
 
-  (define (generate-call-2)		;two arguments
+  (define (generate-call-2)                ;two arguments
     (let ((first-arg-more
-	   (lambda (arg0 ctenv expr)
-	     (let ((second-arg-more
-		    (lambda (arg1 ctenv expr)
-		      (if-more (combination/make f (list arg0 arg1)) operations expr)))
-		   (second-arg-done
-		    (lambda (arg1)
-		      (if-done (combination/make f (list arg0 arg1))))))
-	     (compile-one expr operations ctenv
-			  (infix-wrapper ctenv second-arg-more second-arg-done)
-			  second-arg-done))))
-	  (first-arg-done
-	   (lambda (arg0)
-	     (too-few-arguments f))))
+           (lambda (arg0 ctenv expr)
+             (let ((second-arg-more
+                    (lambda (arg1 ctenv expr)
+                      (if-more (combination/make f (list arg0 arg1)) operations expr)))
+                   (second-arg-done
+                    (lambda (arg1)
+                      (if-done (combination/make f (list arg0 arg1))))))
+             (compile-one expr operations ctenv
+                          (infix-wrapper ctenv second-arg-more second-arg-done)
+                          second-arg-done))))
+          (first-arg-done
+           (lambda (arg0)
+             (too-few-arguments f))))
       (compile-one tail operations ctenv
-		   (infix-wrapper ctenv first-arg-more first-arg-done)
-		   first-arg-done)))
+                   (infix-wrapper ctenv first-arg-more first-arg-done)
+                   first-arg-done)))
 
-  (define (generate-call-3)		;three arguments
+  (define (generate-call-3)                ;three arguments
     (let ((first-arg-more
-	   (lambda (arg0 ctenv expr)
-	     (let ((second-arg-more
-		    (lambda (arg1 ctenv expr)
-		      (let ((third-arg-more
-			     (lambda (arg2 ctenv expr)
-			       (if-more (combination/make f (list arg0 arg1 arg2))
-					operations expr)))
-			    (third-arg-done
-			     (lambda (arg2)
-			       (if-done (combination/make f (list arg0 arg1 arg2))))))
-			(compile-one expr operations ctenv
-				     (infix-wrapper ctenv third-arg-more third-arg-done)
-				     third-arg-done))))
-		   (second-arg-done
-		    (lambda (arg1)
-		      (too-few-arguments f))))
-	       (compile-one expr operations ctenv
-			    (infix-wrapper ctenv second-arg-more second-arg-done)
-			    second-arg-done))))
-	  (first-arg-done
-	   (lambda (arg0)
-	     (too-few-arguments f))))
+           (lambda (arg0 ctenv expr)
+             (let ((second-arg-more
+                    (lambda (arg1 ctenv expr)
+                      (let ((third-arg-more
+                             (lambda (arg2 ctenv expr)
+                               (if-more (combination/make f (list arg0 arg1 arg2))
+                                        operations expr)))
+                            (third-arg-done
+                             (lambda (arg2)
+                               (if-done (combination/make f (list arg0 arg1 arg2))))))
+                        (compile-one expr operations ctenv
+                                     (infix-wrapper ctenv third-arg-more third-arg-done)
+                                     third-arg-done))))
+                   (second-arg-done
+                    (lambda (arg1)
+                      (too-few-arguments f))))
+               (compile-one expr operations ctenv
+                            (infix-wrapper ctenv second-arg-more second-arg-done)
+                            second-arg-done))))
+          (first-arg-done
+           (lambda (arg0)
+             (too-few-arguments f))))
       (compile-one tail operations ctenv
-		   (infix-wrapper ctenv first-arg-more first-arg-done)
-		   first-arg-done)))
+                   (infix-wrapper ctenv first-arg-more first-arg-done)
+                   first-arg-done)))
 
-  (define (generate-call-4)		;four arguments
+  (define (generate-call-4)                ;four arguments
     (let ((first-arg-more
-	   (lambda (arg0 ctenv expr)
-	     (let ((second-arg-more
-		    (lambda (arg1 ctenv expr)
-		      (let ((third-arg-more
-			     (lambda (arg2 ctenv expr)
-			       (let ((fourth-arg-more
-				      (lambda (arg3 ctenv expr)
-					(if-more 
-					 (combination/make f (list arg0 arg1 arg2 arg3))
-					 operations expr)))
-				     (fourth-arg-done
-				      (lambda (arg3)
-					(if-done
-					 (combination/make f (list arg0 arg1 arg2 arg3))))))
-				 (compile-one expr operations ctenv
-					      (infix-wrapper ctenv fourth-arg-more fourth-arg-done)
-					      fourth-arg-done))))
-			    (third-arg-done
-			     (lambda (arg2)
-			       (too-few-arguments f))))
-			(compile-one expr operations ctenv
-				     (infix-wrapper ctenv third-arg-more third-arg-done)
-				     third-arg-done))))
-		   (second-arg-done
-		    (lambda (arg1)
-		      (too-few-arguments f))))
-	       (compile-one expr operations ctenv
-			    (infix-wrapper ctenv second-arg-more second-arg-done)
-			    second-arg-done))))
-	  (first-arg-done
-	   (lambda (arg0)
-	     (too-few-arguments f))))
+           (lambda (arg0 ctenv expr)
+             (let ((second-arg-more
+                    (lambda (arg1 ctenv expr)
+                      (let ((third-arg-more
+                             (lambda (arg2 ctenv expr)
+                               (let ((fourth-arg-more
+                                      (lambda (arg3 ctenv expr)
+                                        (if-more 
+                                         (combination/make f (list arg0 arg1 arg2 arg3))
+                                         operations expr)))
+                                     (fourth-arg-done
+                                      (lambda (arg3)
+                                        (if-done
+                                         (combination/make f (list arg0 arg1 arg2 arg3))))))
+                                 (compile-one expr operations ctenv
+                                              (infix-wrapper ctenv fourth-arg-more fourth-arg-done)
+                                              fourth-arg-done))))
+                            (third-arg-done
+                             (lambda (arg2)
+                               (too-few-arguments f))))
+                        (compile-one expr operations ctenv
+                                     (infix-wrapper ctenv third-arg-more third-arg-done)
+                                     third-arg-done))))
+                   (second-arg-done
+                    (lambda (arg1)
+                      (too-few-arguments f))))
+               (compile-one expr operations ctenv
+                            (infix-wrapper ctenv second-arg-more second-arg-done)
+                            second-arg-done))))
+          (first-arg-done
+           (lambda (arg0)
+             (too-few-arguments f))))
       (compile-one tail operations ctenv
-		   (infix-wrapper ctenv first-arg-more first-arg-done)
-		   first-arg-done)))
+                   (infix-wrapper ctenv first-arg-more first-arg-done)
+                   first-arg-done)))
 
 
   (define (generate-procedure-call)
     (arity-case/make f
-	`(((0) ,(generate-call-0))
+        `(((0) ,(generate-call-0))
 
-	  ;;These should really be abstracted out.
+          ;;These should really be abstracted out.
 
-	  ,@(if (and (not (block/empty? tail))
-		     (not (definition? (block/first tail)))
-		     (not (assq (block/first tail) *infix-operators*)))
-		`(((1) ,(generate-call-1)))
-		'())
-	  ,@(if (and (not (block/empty? tail))
-		     (not (definition? (block/first tail)))
-		     (not (assq (block/first tail) *infix-operators*))
-		     (not (block/empty? (block/rest tail)))
-		     (not (definition? (block/second tail)))
-		     (not (assq (block/second tail) *infix-operators*))
-		     )
-		`(((2) ,(generate-call-2)))
-		'())
-	  ,@(if (and (not (block/empty? tail))
-		     (not (definition? (block/first tail)))
-		     (not (assq (block/first tail) *infix-operators*))
-		     (not (block/empty? (block/rest tail)))
-		     (not (definition? (block/second tail)))
-		     (not (assq (block/second tail) *infix-operators*))
-		     (not (block/empty? (block/rest (block/rest tail))))
-		     (not (definition? (block/third tail)))
-		     (not (assq (block/third tail) *infix-operators*))
-		     )
-		`(((3) ,(generate-call-3)))
-		'())
-	  ,@(if (and (not (block/empty? tail))
-		     (not (definition? (block/first tail)))
-		     (not (assq (block/first tail) *infix-operators*))
-		     (not (block/empty? (block/rest tail)))
-		     (not (definition? (block/second tail)))
-		     (not (assq (block/second tail) *infix-operators*))
-		     (not (block/empty? (block/rest (block/rest tail))))
-		     (not (definition? (block/third tail)))
-		     (not (assq (block/third tail) *infix-operators*))
-		     (not (block/empty? (block/rest (block/rest (block/rest tail)))))
-		     (not (definition? (block/fourth tail)))
-		     (not (assq (block/fourth tail) *infix-operators*))
-		     )
-		`(((4) ,(generate-call-4)))
-		'())
-	  (ELSE ,(too-few-arguments f)))))
+          ,@(if (and (not (block/empty? tail))
+                     (not (definition? (block/first tail)))
+                     (not (assq (block/first tail) *infix-operators*)))
+                `(((1) ,(generate-call-1)))
+                '())
+          ,@(if (and (not (block/empty? tail))
+                     (not (definition? (block/first tail)))
+                     (not (assq (block/first tail) *infix-operators*))
+                     (not (block/empty? (block/rest tail)))
+                     (not (definition? (block/second tail)))
+                     (not (assq (block/second tail) *infix-operators*))
+                     )
+                `(((2) ,(generate-call-2)))
+                '())
+          ,@(if (and (not (block/empty? tail))
+                     (not (definition? (block/first tail)))
+                     (not (assq (block/first tail) *infix-operators*))
+                     (not (block/empty? (block/rest tail)))
+                     (not (definition? (block/second tail)))
+                     (not (assq (block/second tail) *infix-operators*))
+                     (not (block/empty? (block/rest (block/rest tail))))
+                     (not (definition? (block/third tail)))
+                     (not (assq (block/third tail) *infix-operators*))
+                     )
+                `(((3) ,(generate-call-3)))
+                '())
+          ,@(if (and (not (block/empty? tail))
+                     (not (definition? (block/first tail)))
+                     (not (assq (block/first tail) *infix-operators*))
+                     (not (block/empty? (block/rest tail)))
+                     (not (definition? (block/second tail)))
+                     (not (assq (block/second tail) *infix-operators*))
+                     (not (block/empty? (block/rest (block/rest tail))))
+                     (not (definition? (block/third tail)))
+                     (not (assq (block/third tail) *infix-operators*))
+                     (not (block/empty? (block/rest (block/rest (block/rest tail)))))
+                     (not (definition? (block/fourth tail)))
+                     (not (assq (block/fourth tail) *infix-operators*))
+                     )
+                `(((4) ,(generate-call-4)))
+                '())
+          (ELSE ,(too-few-arguments f)))))
 
   (let ((special-compiler (assq f special-forms)))
     (if (eq? special-compiler #f)
-	(operations/lookup operations f
-	  (lambda (operation info) 
-	    (case operation
-	      ((TYPE) (cond ((eq? info 'procedure) (generate-procedure-call))
-			    ((and (pair? info)
-				  (eq? (car info) 'PROCEDURE))
-			     (cond ((null? (cdr info)) (generate-procedure-call))
-				   ((= (cadr info) 0) (generate-call-0))
-				   ((= (cadr info) 1) (generate-call-1))
-				   ((= (cadr info) 2) (generate-call-2))
-				   ((= (cadr info) 3) (generate-call-3))
-				   ((= (cadr info) 4) (generate-call-4))
-				   (else (error "Can't handle this arity yet."))))
-			    (else (generate-non-procedure))))
-	      (else "Unknown operation" operation)))
+        (operations/lookup operations f
+          (lambda (operation info) 
+            (case operation
+              ((TYPE) (cond ((eq? info 'procedure) (generate-procedure-call))
+                            ((and (pair? info)
+                                  (eq? (car info) 'PROCEDURE))
+                             (cond ((null? (cdr info)) (generate-procedure-call))
+                                   ((= (cadr info) 0) (generate-call-0))
+                                   ((= (cadr info) 1) (generate-call-1))
+                                   ((= (cadr info) 2) (generate-call-2))
+                                   ((= (cadr info) 3) (generate-call-3))
+                                   ((= (cadr info) 4) (generate-call-4))
+                                   (else (error "Can't handle this arity yet."))))
+                            (else (generate-non-procedure))))
+              (else "Unknown operation" operation)))
 
-	  (lambda ()
-	    (conditional/make
-	     (procedure-test/make f)
-	     (generate-procedure-call)
-	     (generate-non-procedure))))
-	((cdr special-compiler) tail operations ctenv if-more if-done))))
+          (lambda ()
+            (conditional/make
+             (procedure-test/make f)
+             (generate-procedure-call)
+             (generate-non-procedure))))
+        ((cdr special-compiler) tail operations ctenv if-more if-done))))
 
 (define (compile-else tail operations ctenv if-more if-done)
   (if-done (dangling-else/make)))
 
 (define (compile-for tail operations ctenv if-more if-done)
     (let* ((name (block/first tail))
-	  (first-arg-more
-	   (lambda (arg0 ctenv expr)
-	     (let ((second-arg-more
-		    (lambda (arg1 ctenv expr)
-		      (let ((third-arg-more
-			     (lambda (arg2 ctenv expr)
+          (first-arg-more
+           (lambda (arg0 ctenv expr)
+             (let ((second-arg-more
+                    (lambda (arg1 ctenv expr)
+                      (let ((third-arg-more
+                             (lambda (arg2 ctenv expr)
 
-			       (let ((body (block/first expr)))
-				 (cond ((not (block? body))
-					`(#%ERROR "Missing block in FOR"))
-				       ((block/empty? (block/rest expr))
-					(if-done (for/make name arg0 arg1 arg2
-							   (compile-sequence body operations ctenv))))
-				       (else
-					(if-more (for/make name arg0 arg1 arg2
-							   (compile-sequence body operations ctenv)) operations (block/rest expr)))))))
-			    (third-arg-done
-			     (lambda (arg2)
-			       (too-few-arguments 'for))))
-			(compile-one expr operations ctenv
-				     (infix-wrapper ctenv third-arg-more third-arg-done)
-				     third-arg-done))))
-		   (second-arg-done
-		    (lambda (arg1)
-		      (too-few-arguments 'for))))
-	       (compile-one expr operations ctenv
-			    (infix-wrapper ctenv second-arg-more second-arg-done)
-			    second-arg-done))))
-	  (first-arg-done
-	   (lambda (arg0)
-	     (too-few-arguments 'for))))
+                               (let ((body (block/first expr)))
+                                 (cond ((not (block? body))
+                                        `(#%ERROR "Missing block in FOR"))
+                                       ((block/empty? (block/rest expr))
+                                        (if-done (for/make name arg0 arg1 arg2
+                                                           (compile-sequence body operations ctenv))))
+                                       (else
+                                        (if-more (for/make name arg0 arg1 arg2
+                                                           (compile-sequence body operations ctenv)) operations (block/rest expr)))))))
+                            (third-arg-done
+                             (lambda (arg2)
+                               (too-few-arguments 'for))))
+                        (compile-one expr operations ctenv
+                                     (infix-wrapper ctenv third-arg-more third-arg-done)
+                                     third-arg-done))))
+                   (second-arg-done
+                    (lambda (arg1)
+                      (too-few-arguments 'for))))
+               (compile-one expr operations ctenv
+                            (infix-wrapper ctenv second-arg-more second-arg-done)
+                            second-arg-done))))
+          (first-arg-done
+           (lambda (arg0)
+             (too-few-arguments 'for))))
       (compile-one (block/rest tail) operations ctenv
-		   (infix-wrapper ctenv first-arg-more first-arg-done)
-		   first-arg-done)))
+                   (infix-wrapper ctenv first-arg-more first-arg-done)
+                   first-arg-done)))
 
 
 
@@ -807,106 +807,106 @@
 (define (compile-foreach tail operations ctenv if-more if-done)
   (let* ((name (block/first tail))
 
-	 (foreach-more (lambda (value ctenv* rest)
-			 (if (block? (block/first rest))
-			     (let ((result 
-				    (foreach/make name value
-						  (compile-sequence (block/first rest) operations ctenv*))))
-			       (if (block/empty? (block/rest rest))
-				   (if-done result)
-				   (if-more result ctenv* (block/rest rest))))
-			     (too-few-arguments 'foreach))))
-	 (foreach-done
-	  (lambda (done)
-	    (too-few-arguments 'foreach))))
+         (foreach-more (lambda (value ctenv* rest)
+                         (if (block? (block/first rest))
+                             (let ((result 
+                                    (foreach/make name value
+                                                  (compile-sequence (block/first rest) operations ctenv*))))
+                               (if (block/empty? (block/rest rest))
+                                   (if-done result)
+                                   (if-more result ctenv* (block/rest rest))))
+                             (too-few-arguments 'foreach))))
+         (foreach-done
+          (lambda (done)
+            (too-few-arguments 'foreach))))
     (compile-one (block/rest tail) operations ctenv
-		 (infix-wrapper ctenv foreach-more foreach-done)
-		 foreach-done)))
+                 (infix-wrapper ctenv foreach-more foreach-done)
+                 foreach-done)))
 
 (define (compile-loop tail operations ctenv if-more if-done)
   (let* ((name (gensym))
-	 (repeat-more
-	  (lambda (value ctenv* rest)
-	    (if (block? (block/first rest))
-		(let ((result
-		       (repeat/make name value
-				    (compile-sequence (block/first rest) operations ctenv*))))
-		  (if (block/empty? (block/rest rest))
-		      (if-done result)
-		      (if-more result ctenv* (block/rest rest))))
-		(too-few-arguments 'loop))))
-	 (repeat-done
-	  (lambda (value)
-	    (too-few-arguments 'loop))))
+         (repeat-more
+          (lambda (value ctenv* rest)
+            (if (block? (block/first rest))
+                (let ((result
+                       (repeat/make name value
+                                    (compile-sequence (block/first rest) operations ctenv*))))
+                  (if (block/empty? (block/rest rest))
+                      (if-done result)
+                      (if-more result ctenv* (block/rest rest))))
+                (too-few-arguments 'loop))))
+         (repeat-done
+          (lambda (value)
+            (too-few-arguments 'loop))))
 
     (compile-one tail operations ctenv
-		 (infix-wrapper ctenv repeat-more repeat-done)
-		 repeat-done)
+                 (infix-wrapper ctenv repeat-more repeat-done)
+                 repeat-done)
       ))
 
 
 (define (compile-repeat tail operations ctenv if-more if-done)
   (let* ((name (block/first tail))
-	 (repeat-more
-	  (lambda (value ctenv* rest)
-	    (if (block? (block/first rest))
-		(let ((result
-		       (repeat/make name value
-				    (compile-sequence (block/first rest) operations ctenv*))))
-		  (if (block/empty? (block/rest rest))
-		      (if-done result)
-		      (if-more result ctenv* (block/rest rest))))
-		(too-few-arguments 'repeat))))
-	 (repeat-done
-	  (lambda (value)
-	    (too-few-arguments 'repeat))))
+         (repeat-more
+          (lambda (value ctenv* rest)
+            (if (block? (block/first rest))
+                (let ((result
+                       (repeat/make name value
+                                    (compile-sequence (block/first rest) operations ctenv*))))
+                  (if (block/empty? (block/rest rest))
+                      (if-done result)
+                      (if-more result ctenv* (block/rest rest))))
+                (too-few-arguments 'repeat))))
+         (repeat-done
+          (lambda (value)
+            (too-few-arguments 'repeat))))
 
     (compile-one (block/rest tail) operations ctenv
-		 (infix-wrapper ctenv repeat-more repeat-done)
-		 repeat-done)
+                 (infix-wrapper ctenv repeat-more repeat-done)
+                 repeat-done)
       ))
 
 (define (compile-until tail operations ctenv if-more if-done)
   (let* ((body (block/first tail))
-	 (cbody (until/make (compile-sequence body operations ctenv))))
+         (cbody (until/make (compile-sequence body operations ctenv))))
     
     (if (block/empty? (block/rest tail))
-	(if-done cbody)
-	(if-more cbody ctenv (block/rest tail)))))
+        (if-done cbody)
+        (if-more cbody ctenv (block/rest tail)))))
 
 (define (compile-use tail operations ctenv if-more if-done)
   (let ((names (block/first tail))
-	(body (block/second tail))
-	(tail* (block/rest (block/rest tail))))
+        (body (block/second tail))
+        (tail* (block/rest (block/rest tail))))
 
     (let ((cbody (use/make (block->list names) 
-			   (compile-sequence body operations ctenv))))
+                           (compile-sequence body operations ctenv))))
 
       (if (block/empty? tail*)
-	  (if-done cbody)
-	  ((infix-wrapper ctenv if-more if-done) cbody operations tail*))))) 
+          (if-done cbody)
+          ((infix-wrapper ctenv if-more if-done) cbody operations tail*))))) 
 
 (define (compile-while tail operations ctenv if-more if-done)
   (let ((test (block/first tail))
-	(body (block/second tail)))
+        (body (block/second tail)))
     (if (not (block? test)) (error "bogus test in while")) 
     (if (not (block? body)) (error "bogus body in while")) 
     (let ((ctest (compile-sequence test operations ctenv))
-	  (cbody (compile-sequence body operations ctenv)))
+          (cbody (compile-sequence body operations ctenv)))
       (if (block/empty? (block/rest (block/rest tail)))
-	  (if-done (while/make ctest cbody))
-	  ((infix-wrapper ctenv if-more if-done) 
-	   (while/make ctest cbody) operations (block/rest (block/rest tail)))))))
+          (if-done (while/make ctest cbody))
+          ((infix-wrapper ctenv if-more if-done) 
+           (while/make ctest cbody) operations (block/rest (block/rest tail)))))))
 
 
 (set! special-forms 
       `((ELSE    . ,compile-else)
-	(FOR     . ,compile-for)
+        (FOR     . ,compile-for)
         (FOREACH . ,compile-foreach)
-	(LOOP    . ,compile-loop)
+        (LOOP    . ,compile-loop)
         (REPEAT  . ,compile-repeat)
-	(UNTIL   . ,compile-until)
-	(USE     . ,compile-use)
+        (UNTIL   . ,compile-until)
+        (USE     . ,compile-use)
         (WHILE   . ,compile-while)
       ))
 
@@ -920,18 +920,18 @@
      value))
 
   (compile-one tail operations ctenv
-	       (lambda (value ctenv* rest)
-		 (if-more (generate-assignment value)
-			  operations
-			  rest))
-	       (lambda (value)
-		 (if-done (generate-assignment value)))))
+               (lambda (value ctenv* rest)
+                 (if-more (generate-assignment value)
+                          operations
+                          rest))
+               (lambda (value)
+                 (if-done (generate-assignment value)))))
 
 (define (compile-func d args body tail operations ctenv if-more if-done)
 
   (define (generate-lambda args body)
     (lambda/make (block->list args)
-		 (compile-sequence body operations ctenv)))
+                 (compile-sequence body operations ctenv)))
 
 
   (if (block/empty? tail)
@@ -940,31 +940,31 @@
 
 (define (compile-if tail operations ctenv if-more if-done)
   (let ((after-conditional-more
-	 (lambda (value ctenv* rest)
-	   (if (not (block? (block/first rest)))
-	       (if-done `(#%ERROR "Missing block in IF"))
+         (lambda (value ctenv* rest)
+           (if (not (block? (block/first rest)))
+               (if-done `(#%ERROR "Missing block in IF"))
 
-	   (let ((if-true (compile-sequence (block/first rest) operations ctenv)))
-	     (cond ((block/empty? (block/rest rest))
-		    (if-done (conditional/make value if-true #f)))
-		   ((eq? (block/second rest) 'else)
-		    (let ((if-false (compile-sequence (block/third rest) operations ctenv))
-			  (ttail (block/rest (block/rest (block/rest rest)))))
-		      (if (block/empty? ttail)
-			  (if-done (conditional/make value if-true if-false))
-			  (if-more (conditional/make value if-true if-false)
-				   operations ttail))))
-		   (else
-		    (if-more (conditional/make value if-true #f)
-			     operations
-			     (block/rest rest))))))))
-	(after-conditional-done
-	 (lambda (value)
-	   `(#%ERROR "Missing block in IF"))))
+           (let ((if-true (compile-sequence (block/first rest) operations ctenv)))
+             (cond ((block/empty? (block/rest rest))
+                    (if-done (conditional/make value if-true #f)))
+                   ((eq? (block/second rest) 'else)
+                    (let ((if-false (compile-sequence (block/third rest) operations ctenv))
+                          (ttail (block/rest (block/rest (block/rest rest)))))
+                      (if (block/empty? ttail)
+                          (if-done (conditional/make value if-true if-false))
+                          (if-more (conditional/make value if-true if-false)
+                                   operations ttail))))
+                   (else
+                    (if-more (conditional/make value if-true #f)
+                             operations
+                             (block/rest rest))))))))
+        (after-conditional-done
+         (lambda (value)
+           `(#%ERROR "Missing block in IF"))))
 
     (compile-one tail operations ctenv
-		 (infix-wrapper ctenv after-conditional-more after-conditional-done)
-		 after-conditional-done)
+                 (infix-wrapper ctenv after-conditional-more after-conditional-done)
+                 after-conditional-done)
 
 ))
 
@@ -973,7 +973,7 @@
 
 (define source-file-extension "r")
 (define parsed-file-extension "rs")
-(define translated-file-extension "ss")	;mzscheme specific
+(define translated-file-extension "ss")        ;mzscheme specific
 (define compiled-file-extension "zo")   ;mzscheme specific
 
 (define (extension-checker extension)
@@ -985,11 +985,11 @@
 
 (define (file-new-extension source extension)
   (let* ((len (string-length source))
-	 (base (let loop ((p (sub1 len)))
-		      (cond ((negative? p) source)
-			    ((char=? (string-ref source p) #\.)
-			     (substring source 0 p))
-			    (else (loop (sub1 p)))))))
+         (base (let loop ((p (sub1 len)))
+                      (cond ((negative? p) source)
+                            ((char=? (string-ref source p) #\.)
+                             (substring source 0 p))
+                            (else (loop (sub1 p)))))))
     (string-append base "." extension)))
 
 
@@ -997,8 +997,8 @@
 
 (define (translate-file translator source dest)
   (if (or (not (file-exists? dest))
-	  (> (file-or-directory-modify-seconds source)
-	     (file-or-directory-modify-seconds dest)))
+          (> (file-or-directory-modify-seconds source)
+             (file-or-directory-modify-seconds dest)))
       (translator source dest)))
 
 (define (parse-file source dest)
@@ -1006,15 +1006,15 @@
 
 (define (sherman source)
   (cond ((source-file? source) 
-	 (let ((parsed (file-new-extension source parsed-file-extension)))
-	   (translate-file parse-file source parsed)
-	   (sherman parsed)))
-	((parsed-file? source)
-	 (let ((compiled (file-new-extension source translated-file-extension)))
-	   (translate-file crsf source compiled)
-	   (sherman compiled)))
-	((translated-file? source)
-	 (let ((compiled (file-new-extension source compiled-file-extension)))
-	   (translate-file compile-file source compiled)
-	   (sherman compiled)))
-	(else #t)))
+         (let ((parsed (file-new-extension source parsed-file-extension)))
+           (translate-file parse-file source parsed)
+           (sherman parsed)))
+        ((parsed-file? source)
+         (let ((compiled (file-new-extension source translated-file-extension)))
+           (translate-file crsf source compiled)
+           (sherman compiled)))
+        ((translated-file? source)
+         (let ((compiled (file-new-extension source compiled-file-extension)))
+           (translate-file compile-file source compiled)
+           (sherman compiled)))
+        (else #t)))

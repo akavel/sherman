@@ -41,12 +41,12 @@
 
 (define (free-variable? name body)
   (cond ((eq? name body) #t)
-	((pair? body) (let ((handler (assq (car body) free-variable-special-forms)))
-			(if (eq? handler #f)
-			    (any? (lambda (subform) (free-variable? name subform))
-				  body)
-			    (apply (cadr handler) name (cdr body)))))
-	(else #f)))
+        ((pair? body) (let ((handler (assq (car body) free-variable-special-forms)))
+                        (if (eq? handler #f)
+                            (any? (lambda (subform) (free-variable? name subform))
+                                  body)
+                            (apply (cadr handler) name (cdr body)))))
+        (else #f)))
 
 (define (free-variable-test name)
   (lambda (subform) (free-variable? name subform)))
@@ -55,7 +55,7 @@
   (if (memq name bindings)
       #f
       (any? (lambda (subform) (free-variable? name subform))
-	    body)))
+            body)))
 
 (define (let->named-let name-or-bindings bindings-or-first body receiver)
   (if (symbol? name-or-bindings)
@@ -66,22 +66,22 @@
   (let->named-let name-or-bindings bindings-or-first body
    (lambda (name bindings body)
      (or (any? (free-variable-test var)
-	       (map cadr bindings))
-	 (if (memq var (map car bindings))
-	     #f
-	     (any? (free-variable-test var)
-		   body))))))
+               (map cadr bindings))
+         (if (memq var (map car bindings))
+             #f
+             (any? (free-variable-test var)
+                   body))))))
 
 (define free-variable-special-forms '())
 
 (define (any? predicate list)
   (and (pair? list)
        (or (predicate (car list))
-	   (any? predicate (cdr list)))))
+           (any? predicate (cdr list)))))
 
 (set! free-variable-special-forms
       `((LAMBDA   ,free-variable/lambda)
         (#%LAMBDA ,free-variable/lambda)
-	(LET      ,free-variable/let)
+        (LET      ,free-variable/let)
         (#%LET    ,free-variable/let)
-	))
+        ))

@@ -99,17 +99,17 @@
      ;; now, copy the head elements until reaching the tail
      (let loop ((scan (car b)))
        (if (eq? scan (cdr b))
-	   tail-copy
-	   (cons (car scan) (loop (cdr scan)))))
+           tail-copy
+           (cons (car scan) (loop (cdr scan)))))
      tail-copy)))
 
 (define (block/find block element)
   ;; We'd like to use member, but we can't 
   (let loop ((scan (cdr block)))
     (cond ((null? (cdr scan)) #f)
-	  ((equal? (cadr scan) element)
-	   (cons (car block) scan))
-	  (else (loop (cdr scan))))))
+          ((equal? (cadr scan) element)
+           (cons (car block) scan))
+          (else (loop (cdr scan))))))
 
 (define (block/head block)
   (cons (car block) (car block)))
@@ -127,13 +127,13 @@
 
 (define (block/insert-part! dest src count)
   (let* ((original-tail (cddr dest))
-	 (new-tail (append-head (block->list src) original-tail count)))
+         (new-tail (append-head (block->list src) original-tail count)))
     (set-cdr! (cdr dest) new-tail)
     ;; Bump past the insert
     (let loop ((scan (cdr dest)))
       (if (eq? (cdr scan) original-tail)
-	  (set-cdr! dest scan)
-	  (loop (cdr scan))))
+          (set-cdr! dest scan)
+          (loop (cdr scan))))
     dest))
 
 (define (block/length block)
@@ -146,18 +146,18 @@
 (define (block/select block element)
   (let ((found (member element (cddr block))))
     (and found
-	(cadr found)
-	)))
+        (cadr found)
+        )))
 
 (define (block/set-first! block new-first)
   (set-car! (cddr block) new-first))
 
 (define (block/set-n! dest new-stuff)
   (let loop ((dest (block->list dest))
-	     (src  (block->list new-stuff)))
+             (src  (block->list new-stuff)))
     (if (not (null? src))
-	(begin (set-car! dest (car src))
-	       (loop (cdr dest) (cdr src))))))
+        (begin (set-car! dest (car src))
+               (loop (cdr dest) (cdr src))))))
 
 (define (block/skip block n)
   (if (>= n 0)
@@ -166,13 +166,13 @@
 
 (define (block/splice! dest source)
   (let* ((current-tail (block->list dest))
-	 (new-tail (append (block->list source) current-tail)))
+         (new-tail (append (block->list source) current-tail)))
     (set-cdr! (cdr dest) new-tail)
     ;; Bump past the insert
 ;    (let loop ((scan (cdr dest)))
 ;      (if (eq? (cdr scan) current-tail)
-;	  (set-cdr! dest scan)
-;	  (loop (cdr scan))))
+;          (set-cdr! dest scan)
+;          (loop (cdr scan))))
     ))
 
 (define (block->stream block)
