@@ -36,7 +36,10 @@ local function write(s)
 	io.write(s)
 end
 local whitespace = S' \t'^1
-local newline = P'\n' / function() line = line+1 end
+local newline = P'\n' / function()
+	line = line+1 
+	discretionary_space = 0
+end
 -- Colon is part of symbol constituent so that things like
 --  foo/:bar/baz  will match.
 local symbol_initial = R'az' + S'/`!&_?|<=>*~.+-'
@@ -64,6 +67,10 @@ local rebol = P{
 		end) +
 		newline / function()
 			write '\n'
+		end +
+		whitespace / function(s)
+			write(s:sub(1, -1-discretionary_space))
+			discretionary_space = 0
 		end +
 		V'symbol' / function(s)
 			write(s:gsub("[|.`'\"\\]", function(c)
