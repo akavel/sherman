@@ -14,6 +14,7 @@ local Cf = lpeg.Cf
 local V = lpeg.V
 local S = lpeg.S
 local P = lpeg.P
+local R = lpeg.R
 
 -- parser state
 local line = 1
@@ -36,6 +37,10 @@ local function write(s)
 end
 local whitespace = S' \t'^1
 local newline = P'\n' / function() line = line+1 end
+-- Colon is part of symbol constituent so that things like
+--  foo/:bar/baz  will match.
+local symbol_initial = R'az' + S'/`!&_?|<=>*~.+-'
+local symbol_constituent = symbol_initial + R'09' + P':'
 
 -- Grammar
 local rebol = P{
@@ -59,8 +64,17 @@ local rebol = P{
 		end) +
 		newline / function()
 			write '\n'
+		end +
+		V'symbol' / function(s)
+			write(s:gsub("[|.`'\"\\]", function(c)
+				return '\\'..c
+			end))
+			write ' '  -- just in case
+			discretionary_space = 1
 		end
 	)^0,
+	symbol =    -- FIXME: add the rest of patterns
+		symbol_initial * symbol_constituent^0,
 }
 
 write '`(SHERMAN ,(LIST->BLOCK `('

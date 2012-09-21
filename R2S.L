@@ -713,7 +713,7 @@ main(void)
             ptr = result.start;
             for (i=result.length; i>0; i--) {
                 char c = *ptr++;
-                if (strchr("|.`'\"\\",c) != 0)
+                if (strchr("|.`'\"\\", c) != 0)
                     printf("\\");
                 printf("%c", c);
             }
