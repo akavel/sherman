@@ -1,0 +1,421 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD><TITLE>lua-users wiki: Lpeg Tutorial</TITLE>
+<LINK TYPE="text/css" REL="stylesheet" HREF="/styles/main.css">
+</HEAD>
+<BODY ><table width="100%" border="0"> <tr><td align=left width="100%"><h1><a href="/cgi-bin/wiki.pl?action=search&amp;string=LpegTutorial&amp;body=1" title="List pages referring to LpegTutorial">Lpeg Tutorial</a></h1></td><td align=right>
+    <table cellpadding="0" cellspacing="0" border="0" width="1%">
+      <tbody>
+        <tr>
+            <td><a href="/">
+            <img src="/images/nav-logo.png" alt="lua-users home" width="177" height="40" border="0"></a></td>
+        </tr>
+        <tr>
+            <td>
+            <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tbody>
+                <tr>
+                    <td><img src="/images/nav-elbow.png" alt="" width="48" height="40"></td>
+                    <td nowrap valign="middle" width="100%">
+                        <a href="/wiki/" class="nav">wiki</a></td>
+                </tr>
+                </tbody>
+            </table>
+            </td>
+        </tr>
+      </tbody>
+    </table>
+<form method="post" action="/wiki/FindPage" enctype="application/x-www-form-urlencoded" style="display:inline; margin:0;">
+<input type="hidden" name="action" value="search"  /><input type="text" name="string"  size="20" style="" id="search_query1" /><input type="hidden" name="title" value="1"  /><input type="submit" name=".submit" value="Search" /><input type="hidden" name="body" value="on"  /></form></td></tr> </table>
+<br clear=all>
+<H2>Simple Matching</H2>
+<p>
+LPeg is a powerful notation for matching text data, which is more capable than Lua string patterns and standard regular expressions.  However, like any language you need to know the basic words and how to combine them.<p>
+The best way to learn is to play with patterns in an interactive session, first by defining some shortcuts:<p>
+<pre class="code">
+$ lua -llpeg
+Lua 5.1.4  Copyright (C) 1994-2008 Lua.org, PUC-Rio
+&gt; match = lpeg.match <span class="comment">-- match a pattern against a string</span>
+&gt; P = lpeg.P <span class="comment">-- match a string literally</span>
+&gt; S = lpeg.S  <span class="comment">-- match anything in a set</span>
+&gt; R = lpeg.R  <span class="comment">-- match anything in a range</span>
+</pre>
+<p>
+Matches occur against the <em>start</em> of the string, and successful matches return the position immediately after the successful match, or <code>nil</code> if unsuccesful. (Here I'm using the fact that <code>f'x'</code> is equivalent to <code>f('x')</code> in Lua; using single quotes has the same meaning as double quotes.)<p>
+<pre class="code">
+&gt; = match(P<span class="string">'a'</span>,<span class="string">'aaa'</span>)
+2
+&gt; = match(P<span class="string">'a'</span>,<span class="string">'123'</span>)
+<span class="keyword">nil</span>
+</pre>
+<p>
+It works like <code>string.find</code>, except it only returns one index.<p>
+You can match against <em>ranges</em> or <em>sets</em> of characters:<p>
+<pre class="code">
+&gt; = match(R<span class="string">'09'</span>,<span class="string">'123'</span>)
+2
+&gt; =  match(S<span class="string">'123'</span>,<span class="string">'123'</span>)
+2
+</pre>
+<p>
+Matching more than one item is done with the <code>^</code> operator. In this case, the match is equivalent to the Lua pattern '^a+' - one or more occurrances of 'a':<p>
+<pre class="code">
+&gt; = match(P<span class="string">'a'</span>^1,<span class="string">'aaa'</span>)
+4
+</pre>
+<p>
+Combining patterns in order is done with the <code>*</code> operator. This is equivalent to '^ab*' - one 'a' followed by zero or more 'b's:<p>
+<pre class="code">
+&gt; = match(P<span class="string">'a'</span>*P<span class="string">'b'</span>^0,<span class="string">'abbc'</span>)
+4
+</pre>
+<p>
+So far, lpeg is giving us a more verbose way of expressing regular expressions, but these patterns are <em>composible</em> - they can be easily built up from simpler patterns, without awkward string operations. In this way, lpeg patterns can be made to be easier to read than their equivalent regular expressions. Note that you can often leave out an explicit <code>P</code> call when constructing patterns, if one of the arguments is already a pattern:<p>
+<pre class="code">
+&gt; maybe_a = P<span class="string">'a'</span>^-1  <span class="comment">-- one or zero matches of 'a'</span>
+&gt; match_ab = maybe_a * <span class="string">'b'</span>
+&gt; = match(match_ab, <span class="string">'ab'</span>)
+3
+&gt; =  match(match_ab, <span class="string">'b'</span>)
+2
+&gt; =  match(match_ab, <span class="string">'aaab'</span>)
+<span class="keyword">nil</span>
+</pre>
+<p>
+The <code>+</code> operator means <em>either</em> one or the other pattern:<p>
+<pre class="code">
+&gt; either_ab = (P<span class="string">'a'</span> + P<span class="string">'b'</span>)^1 <span class="comment">-- sequence of either 'a' or 'b'</span>
+&gt; = either_ab:match <span class="string">'aaa'</span>
+4
+&gt; =  either_ab:match <span class="string">'bbaa'</span>
+5
+</pre>
+<p>
+Note that the pattern object has a <code>match</code> method!<p>
+Of course, <code>S'ab'^1</code> would be a shorter way to say this, but the arguments here can be arbitary patterns. <p>
+<H2>Basic Captures</H2>
+<p>
+Getting the index after a match is all very well, and you can then use <code>string.sub</code> to extract the strings. But there are ways of explicitly asking for <em>captures</em>:<p>
+<pre class="code">
+&gt; C = lpeg.C  <span class="comment">-- captures a match</span>
+&gt; Ct = lpeg.Ct <span class="comment">-- a table with all captures from the pattern</span>
+</pre>
+<p>
+The first is equivalent to how '(...)' is used in Lua patterns (or '\(...\)' in regular expressions)<p>
+<pre class="code">
+&gt; digit = R<span class="string">'09'</span> <span class="comment">-- anything from '0' to '9'</span>
+&gt; digits = digit^1 <span class="comment">-- a sequence of at least one digit</span>
+&gt; cdigits= C(digits)  <span class="comment">-- capture digits</span>
+&gt; = cdigits:match <span class="string">'123'</span>
+123
+</pre>
+<p>
+So to get the string value, enclose the pattern in <code>C</code>.<p>
+This pattern doesn't cover a general integer, which may have a '+' or '-' up front:<p>
+<pre class="code">
+&gt; int = S<span class="string">'+-'</span>^-1 * digits
+&gt; = match(C(int),<span class="string">'+23'</span>)
++23
+</pre>
+<p>
+Unlike with Lua patterns or regular expressions, you don't have to worry about escaping 'magic' characters - every character in a string stands for itself: '(','+','*', etc are just their ASCII equilvalents.<p>
+A special kind of capture is provided by the <code>/</code> operator - it passes the captured string through a function or a table. Here I'm adding one to the result, just to show that the result has been converted into a number with <code>tostring</code>:<p>
+<pre class="code">
+&gt; =  match(int/<span class="library">tonumber</span>,<span class="string">'+123'</span>) + 1
+124
+</pre>
+<p>
+Note that multiple captures can be returned by a match, just like <code>string.match</code>. This is equivalent to '^(a+)(b+)':<p>
+<pre class="code">
+&gt; = match(C(P<span class="string">'a'</span>^1) * C(P<span class="string">'b'</span>^1), <span class="string">'aabbbb'</span>)
+aa	bbbb
+</pre>
+<p>
+<H2>Building more complicated Patterns</H2>
+<p>
+Consider general floating-point numbers:<p>
+<pre class="code">
+&gt; <span class="keyword">function</span> maybe(p) <span class="keyword">return</span> p^-1 <span class="keyword">end</span>
+&gt; digits = R<span class="string">'09'</span>^1
+&gt; mpm = maybe(S<span class="string">'+-'</span>)
+&gt; dot = <span class="string">'.'</span>
+&gt; exp = S<span class="string">'eE'</span>
+&gt; float = mpm * digits * maybe(dot*digits) * maybe(exp*mpm*digits)
+&gt; = match(C(float),<span class="string">'2.3'</span>)
+2.3
+&gt; = match(C(float),<span class="string">'-2'</span>)
+-2
+&gt; = match(C(float),<span class="string">'2e-02'</span>)
+2e-02
+</pre>
+<p>
+This lpeg pattern is <em>easier</em> to read than the regular expression equivalent '[-+]?[0-9]+\.?[0-9]+([eE][+-]?[0-9]+)?'; shorter is always better! One reason is that we can work with patterns as <em>expressions</em>: factor out common patterns, write functions for convenience and clarity, etc.  Note that there is no penalty for writing things out in this fashion; lpeg remains a very fast way to parse text!<p>
+More complicated structures can be composed from these building blocks. Consider the task of parsing a list of floating point numbers. A list is a number followed by zero or more groups consisting of a comma and a number:<p>
+<pre class="code">
+&gt; listf = C(float) * (<span class="string">','</span> * C(float))^0
+&gt; = listf:match <span class="string">'2,3,4'</span>
+2	3	4
+</pre>
+<p>
+That's cool, but it would be even cooler to have this as an actual list. This is where <code>lpeg.Ct</code> comes in;  it collects all the captures within a pattern into a table.<p>
+<pre class="code">
+= match(Ct(listf),<span class="string">'1,2,3'</span>)
+<span class="library">table</span>: 0x84fe628
+</pre>
+<p>
+Stock Lua does not pretty-print tables, but you can use [? Microlight] for this job:<p>
+<pre class="code">
+&gt; <span class="library">tostring</span> = <span class="library">require</span> <span class="string">'ml'</span>.tstring
+&gt; = match(Ct(listf),<span class="string">'1,2,3'</span>)
+{<span class="string">"1"</span>,<span class="string">"2"</span>,<span class="string">"3"</span>}
+</pre>
+<p>
+The values are still strings. It's better to write <code>listf</code> so that it converts its captures:<p>
+<pre class="code">
+&gt; floatc = float/<span class="library">tonumber</span>
+&gt; listf = floatc * (<span class="string">','</span> * floatc)^0
+</pre>
+<p>
+This way of capturing lists is very general, since you can put <em>any</em> expression that captures in the place of <code>floatc</code>.  But this list pattern is still too restrictive, because generally we want to ignore whitespace<p>
+<pre class="code">
+&gt; sp = P<span class="string">' '</span>^0  <span class="comment">-- zero or more spaces (like '%s*')</span>
+&gt; <span class="keyword">function</span> space(pat) <span class="keyword">return</span> sp * pat * sp <span class="keyword">end</span> <span class="comment">-- surrond a pattern with optional space</span>
+&gt; floatc = space(float/<span class="library">tonumber</span>) 
+&gt; listc = floatc * (<span class="string">','</span> * floatc)^0
+&gt; =  match(Ct(listc),<span class="string">' 1,2, 3'</span>)
+{1,2,3}
+</pre>
+<p>
+It's a matter of taste, but here I prefer to allow optional space around the <em>items</em>, rather than allowing space specifically around the <em>delimiter</em> ','.<p>
+With lpeg, we can be programmers again with pattern matching, and reuse patterns:<p>
+<pre class="code">
+<span class="keyword">function</span> list(pat)
+    pat = space(pat)
+    <span class="keyword">return</span> pat * (<span class="string">','</span> * pat)^0
+<span class="keyword">end</span>
+</pre>
+<p>
+So, a list of identifiers (according to the usual rules):<p>
+<pre class="code">
+&gt; idenchar = R(<span class="string">'AZ'</span>,<span class="string">'az'</span>)+P<span class="string">'_'</span>
+&gt; iden = idenchar * (idenchar+R<span class="string">'09'</span>)^0
+&gt; =  list(C(iden)):match <span class="string">'hello, dolly, _x, s23'</span>
+<span class="string">"hello"</span>	<span class="string">"dolly"</span>	<span class="string">"_x"</span>	<span class="string">"s23"</span>
+</pre>
+<p>
+Using explicit ranges seems old-fashioned and error-prone. A more portable solution is to use the lpeg equivalent of <em>character classes</em>, which are by definition locale-independent:<p>
+<pre class="code">
+&gt; l = {}
+&gt; lpeg.locale(l)
+&gt; <span class="keyword">for</span> k <span class="keyword">in</span> <span class="library">pairs</span>(l) <span class="keyword">do</span> <span class="library">print</span>(k) <span class="keyword">end</span>
+<span class="string">"punct"</span>
+<span class="string">"alpha"</span>
+<span class="string">"alnum"</span>
+<span class="string">"digit"</span>
+<span class="string">"graph"</span>
+<span class="string">"xdigit"</span>
+<span class="string">"upper"</span>
+<span class="string">"space"</span>
+<span class="string">"print"</span>
+<span class="string">"cntrl"</span>
+<span class="string">"lower"</span>
+&gt; iden =  (l.alpha+P<span class="string">'_'</span>) * (l.alnum+P<span class="string">'_'</span>)^0
+</pre>
+<p>
+Given this definition of <code>list</code>, it's easy to define a simple subset of the common CSV format, where each record is a list separated by a linefeed:<p>
+<pre class="code">
+&gt; rlistf =  list(float/<span class="library">tonumber</span>)
+&gt; csv = Ct( (Ct(listf)+<span class="string">'\n'</span>)^1 )
+&gt; =  csv:match <span class="string">'1,2.3,3\n10,20, 30\n'</span>
+{{1,2.3,3},{10,20,30}}
+</pre>
+<p>
+One good reason to learn lpeg is that it performs very satisfactorily. This pattern is a <em>lot</em> faster than parsing the data with Lua string matching.<p>
+<H2>String Substitution</H2>
+<p>
+I will show that lpeg can do all that <code>string.gsub</code> can do, and more generally and flexibly.<p>
+One operator that we have not used yet is <code>-</code>, which means 'either/or'. Consider the problem of matching double-quoted strings. In the simplest case, they are a double-quote followed by any characters which are not a double-quote, followed by a closing double-quote.  <code>P(1)</code> matches <em>any</em> single character, i.e. it is the equivalent of '.' in string patterns.  A string may be empty, so we match zero or more non-quote characters:<p>
+<pre class="code">
+&gt; Q = P<span class="string">'"'</span>
+&gt; str = Q * (P(1) - Q)^0 * Q
+&gt; = C(str):match <span class="string">'"hello"'</span>
+<span class="string">"\"hello\""</span>
+</pre>
+<p>
+Or you may want to extract the contents of the string, without quotes. In this context, just using <code>1</code> instead of <code>P(1)</code> is not ambiguous, and in fact this is how you will usually see this 'any x which is not a P' pattern:<p>
+<pre class="code">
+&gt; str2 = Q * C((1 - Q)^0) * Q
+&gt; = str2:match <span class="string">'"hello"'</span>
+<span class="string">"hello"</span>
+</pre>
+<p>
+This pattern is obviously generalizable; often the terminating pattern is not the same as the final pattern:<p>
+<pre class="code">
+<span class="keyword">function</span> extract_quote(openp,endp)
+    openp = P(openp)
+    endp = endp <span class="keyword">and</span> P(endp) <span class="keyword">or</span> openp
+    <span class="keyword">local</span> upto_endp = (1 - endp)^1 
+    <span class="keyword">return</span> openp * C(upto_endp) * endp
+<span class="keyword">end</span>
+</pre>
+<p>
+<pre class="code">
+&gt; <span class="keyword">return</span>  extract_quote(<span class="string">'('</span>,<span class="string">')'</span>):match <span class="string">'(and more)'</span>
+<span class="string">"and more"</span>
+&gt; = extract_quote(<span class="string">'[['</span>,<span class="string">']]'</span>):match <span class="string">'[[long string]]'</span>
+<span class="string">"long string"</span>
+</pre>
+<p>
+Now consider translating Markdown <code>code</code> (back-slash enclosed text) into the format understood by the Lua wiki (double-brace enclosed text). The naive way is to extract the string and concatenate the result, but this is clumsy and (as we will see) limit our options tremendously.<p>
+<pre class="code">
+<span class="keyword">function</span> subst(openp,repl,endp)
+    openp = P(openp)
+    endp = endp <span class="keyword">and</span> P(endp) <span class="keyword">or</span> openp
+    <span class="keyword">local</span> upto_endp = (1 - endp)^1 
+    <span class="keyword">return</span> openp * C(upto_endp)/repl * endp
+<span class="keyword">end</span>
+</pre>
+<p>
+<pre class="code">
+&gt; =  subst(<span class="string">'`'</span>,<span class="string">'{{%1}}'</span>):match <span class="string">'`code`'</span>
+<span class="string">"{{code}}"</span>
+&gt; =  subst(<span class="string">'_'</span>,<span class="string">"''%1''"</span>):match <span class="string">'_italics_'</span>
+<span class="string">"''italics''"</span>
+</pre>
+<p>
+We've come across the capture-processing operator <code>/</code> before, using <code>tonumber</code> to convert numbers. It also understands strings in a very similar format to <code>string.gsub</code>, where <code>%n</code> means the n-th capture.<p>
+This operation can be expressed exactly as:<p>
+<pre class="code">
+&gt; = <span class="library">string.gsub</span>(<span class="string">'_italics'</span>,<span class="string">'^_([^_]+)_'</span>,<span class="string">"''%1''"</span>)
+<span class="string">"''italics''"</span>
+</pre>
+<p>
+But the advantage is that we don't have to build up a custom string pattern and worry about escaping 'magic' characters like '(' and ').<p>
+<code>lpeg.Cs</code> is a <em>substitution capture</em>, and it provides a more general module of global string substitution. In the lpeg manual, there is this equivalent to <code>string.gsub</code>:<p>
+<pre class="code">
+<span class="keyword">function</span> gsub (s, patt, repl)
+    patt = P(patt)
+    <span class="keyword">local</span> p = Cs ((patt / repl + 1)^0)
+    <span class="keyword">return</span> p:match(s)
+<span class="keyword">end</span>
+
+&gt; =  gsub(<span class="string">'hello dog, dog!'</span>,<span class="string">'dog'</span>,<span class="string">'cat'</span>)
+<span class="string">"hello cat, cat!"</span>
+</pre>
+<p>
+To understand the difference, here's that pattern using plain <code>C</code>:<p>
+<pre class="code">
+&gt; p = C((P<span class="string">'dog'</span>/<span class="string">'cat'</span> + 1)^0)
+&gt; = p:match <span class="string">'hello dog, dog!'</span>
+<span class="string">"hello dog, dog!"</span>	<span class="string">"cat"</span>	<span class="string">"cat"</span>
+</pre>
+<p>
+The <code>C</code> here just captures the whole match, and each '/' adds a new capture with the value of the replacement string. <p>
+With <code>Cs</code>, <em>everything</em> gets captured, and a string is built out of all the captures. Some of those captures get modified by '/', and so we have substitutions.  <p>
+In Markdown, block quoted lines begin with '&gt; '.<p>
+<pre class="code">
+lf = P<span class="string">'\n'</span>
+rest_of_line_nl = C((1 - lf)^0*lf)         <span class="comment">-- capture chars upto \n</span>
+quoted_line = <span class="string">'&gt; '</span>*rest_of_line_nl       <span class="comment">-- block quote lines start with '&gt; '</span>
+<span class="comment">-- collect the quoted lines and put inside [[[..]]]</span>
+quote = Cs (quoted_line^1)/<span class="string">"[[[\n%1]]]\n"</span>
+
+&gt; = quote:match <span class="string">'&gt; hello\n&gt; dolly\n'</span>
+<span class="string">"[[[
+&gt; hello
+&gt; dolly
+]]]
+"</span>
+</pre>
+<p>
+That's not quite right - <code>Cs</code> captures everything, including the '&gt; '. But we can force some captures to return empty strings:}}}<p>
+<pre class="code">
+<span class="keyword">function</span> empty(p)
+    <span class="keyword">return</span> C(p)/<span class="string">''</span>
+<span class="keyword">end</span>
+
+quoted_line = empty (<span class="string">'&gt; '</span>) * rest_of_line_nl
+...
+</pre>
+<p>
+Now things will work correctly!<p>
+Here is the program used to convert this document from Markdown to Lua wiki format:<p>
+<pre class="code">
+<span class="keyword">local</span> lpeg = <span class="library">require</span> <span class="string">'lpeg'</span>
+
+<span class="keyword">local</span> P,S,C,Cs,Cg = lpeg.P,lpeg.S,lpeg.C,lpeg.Cs,lpeg.Cg
+
+<span class="keyword">local</span> test = <span class="string">[[
+## A title
+
+here _we go_ and `a:bonzo()`:
+
+    one line
+    two line
+    three line
+       
+and `more_or_less_something`
+
+[A reference](http://bonzo.dog)
+
+&gt; quoted
+&gt; lines
+ 
+]]</span>
+
+<span class="keyword">function</span> subst(openp,repl,endp)
+    openp = P(openp)  <span class="comment">-- make sure it's a pattern</span>
+    endp = endp <span class="keyword">and</span> P(endp) <span class="keyword">or</span> openp
+    <span class="comment">-- pattern is 'bracket followed by any number of non-bracket followed by bracket'</span>
+    <span class="keyword">local</span> contents = C((1 - endp)^1)
+    <span class="keyword">local</span> patt = openp * contents * endp    
+    <span class="keyword">if</span> repl <span class="keyword">then</span> patt = patt/repl <span class="keyword">end</span>
+    <span class="keyword">return</span> patt
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> empty(p)
+    <span class="keyword">return</span> C(p)/<span class="string">''</span>
+<span class="keyword">end</span>
+
+lf = P<span class="string">'\n'</span>
+rest_of_line = C((1 - lf)^1)
+rest_of_line_nl = C((1 - lf)^0*lf)
+
+<span class="comment">-- indented code block</span>
+indent = P<span class="string">'\t'</span> + P<span class="string">'    '</span>
+indented = empty(indent)*rest_of_line_nl
+<span class="comment">-- which we'll assume are Lua code</span>
+block = Cs(indented^1)/<span class="string">'    [[[!Lua\n%1]]]\n'</span>
+
+<span class="comment">-- use &gt; to get simple quoted block</span>
+quoted_line = empty(<span class="string">'&gt; '</span>)*rest_of_line_nl 
+quote = Cs (quoted_line^1)/<span class="string">"[[[\n%1]]]\n"</span>
+ 
+code = subst(<span class="string">'`'</span>,<span class="string">'{{%1}}'</span>)
+italic = subst(<span class="string">'_'</span>,<span class="string">"''%1''"</span>)
+bold = subst(<span class="string">'**'</span>,<span class="string">"'''%1'''"</span>)
+rest_of_line = C((1 - lf)^1)
+title1 = P<span class="string">'##'</span> * rest_of_line/<span class="string">'=== %1 ==='</span>
+title2 = P<span class="string">'###'</span> * rest_of_line/<span class="string">'== %1 =='</span>
+
+url = (subst(<span class="string">'['</span>,<span class="keyword">nil</span>,<span class="string">']'</span>)*subst(<span class="string">'('</span>,<span class="keyword">nil</span>,<span class="string">')'</span>))/<span class="string">'[%2 %1]'</span>
+ 
+item = block + title1 + title2 + code + italic + bold + quote + url + 1
+text = Cs(item^1)
+
+<span class="keyword">if</span> arg[1] <span class="keyword">then</span>
+    <span class="keyword">local</span> f = <span class="library">io.open</span>(arg[1])
+    test = f:read <span class="string">'*a'</span>
+    f:close()
+<span class="keyword">end</span>
+
+<span class="library">print</span>(text:match(test))
+</pre>
+<p>
+Due to an escaping problem with this Wiki, I had to substitute '[' for '{', etc in this source. Be warned!<p>
+<a href="/wiki/SteveDonovan" >SteveDonovan</a>,  12 June 2012<p>
+<p>
+<hr>
+<a href="/wiki/RecentChanges" >RecentChanges</a> &middot; <a href="/cgi-bin/wiki.pl?action=editprefs" >preferences</a><br>
+<a href="/cgi-bin/wiki.pl?action=edit&amp;id=LpegTutorial" >edit</a> &middot; <a href="/cgi-bin/wiki.pl?action=history&amp;id=LpegTutorial" >history</a><br>Last edited June 13, 2012 2:52 pm GMT <a href="/cgi-bin/wiki.pl?action=browse&amp;diff=1&amp;id=LpegTutorial" >(diff)</a>
+</body>
+</html>
