@@ -40,6 +40,8 @@ local newline = P'\n' / function()
 	line = line+1 
 	discretionary_space = 0
 end
+local sign = S'-+'
+local digit = R'09'
 -- Colon is part of symbol constituent so that things like
 --  foo/:bar/baz  will match.
 local symbol_initial = R'az' + S'/`!&_?|<=>*~.+-'
@@ -58,13 +60,16 @@ local rebol = P{
 		newline^0 *
 		#P'[',
 	body = (
-		(P'[' / function()
+		V'integer' / function(s)
+			write(s:gsub("'", ""))
+		end +
+		P'[' / function()
 			write ',(LIST->BLOCK `('
-		end) +
-		(P']' / function()
+		end +
+		P']' / function()
 			write ')) '    -- Space just in case
 			discretionary_space = 1
-		end) +
+		end +
 		newline / function()
 			write '\n'
 		end +
@@ -82,6 +87,8 @@ local rebol = P{
 	)^0,
 	symbol =    -- FIXME: add the rest of patterns
 		symbol_initial * symbol_constituent^0,
+	integer =   -- FIXME: add the rest of patterns
+		sign^-1 * digit^1
 }
 
 write '`(SHERMAN ,(LIST->BLOCK `('
