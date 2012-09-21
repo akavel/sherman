@@ -73,9 +73,6 @@ local rebol = P{
 		V'integer' / function(s)
 			write(s:gsub("'", ""))
 		end +
-		V'comment' / write +
-		V'qstr' / handlestring +
-		V'lstr' / handlestring +
 		P'[' / function()
 			write ',(LIST->BLOCK `('
 		end +
@@ -83,6 +80,14 @@ local rebol = P{
 			write ')) '    -- Space just in case
 			discretionary_space = 1
 		end +
+		P'(' / write +
+		P')' / function()
+			write ') '
+			discretionary_space = 1
+		end +
+		V'comment' / write +
+		V'qstr' / handlestring +
+		V'lstr' / handlestring +
 		newline / function()
 			write '\n'
 		end +
