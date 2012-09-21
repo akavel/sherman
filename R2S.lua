@@ -15,6 +15,10 @@ local V = lpeg.V
 local S = lpeg.S
 local P = lpeg.P
 
+-- parser state
+local line = 1
+local discretionary_space = 0
+
 -- utility functions, etc.
 local function anycase(s)
 	local function char(n)
@@ -27,27 +31,45 @@ local function anycase(s)
 	end
 	return result
 end
+local function write(s)
+	io.write(s)
+end
 local whitespace = S' \t'^1
-
--- parser state
-local line = 1
+local newline = P'\n' / function() line = line+1 end
 
 -- Grammar
 local rebol = P{
 	"rebol";           -- name of rule to start with
 
-	rebol = 
+	rebol = V'preamble' * V'body',
+	preamble =
 		whitespace^0 *
-		(P'\n' / function() line = line+1 end)^0 *
-		anycase 'rebol' / function() print 'hi' print(line) end,
-	--rebol = V'initial' * V'body',
-	--initial = 
+		newline^0 *
+		anycase 'rebol' *
+		whitespace^0 *
+		newline^0 *
+		#P'[',
+	body = (
+		(P'[' / function()
+			write ',(LIST->BLOCK `('
+		end) +
+		(P']' / function()
+			write ')) '    -- Space just in case
+			discretionary_space = 1
+		end) +
+		newline / function()
+			write '\n'
+		end
+	)^0,
 }
 
+write '`(SHERMAN ,(LIST->BLOCK `('
 local success = rebol:match(code)
 if not success then
 	error("parsing error on line "..line)
 end
+write '\n))) ;; END of SHERMAN CODE'
+
 
 end -- function parse()
 
