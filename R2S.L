@@ -176,7 +176,7 @@ struct token {
         tok->start = yytext;         \
         tok->length = yyleng;        \
         return 1;                    \
-        } while (0)              
+    } while (0)              
 
 #define QSTRING()                                 \
     do {                                          \
@@ -185,7 +185,7 @@ struct token {
         tok->start = qstring_start;               \
         tok->length = yytext - qstring_start;     \
         return 1;                                 \
-        } while (0)              
+    } while (0)              
 
 #define BOGUS_QSTRING()                           \
     do {                                          \
@@ -194,7 +194,7 @@ struct token {
         tok->start = qstring_start;               \
         tok->length = yytext - qstring_start;     \
         return 1;                                 \
-        } while (0)              
+    } while (0)              
 
 #define LSTRING()                                 \
     do {                                          \
@@ -203,7 +203,7 @@ struct token {
         tok->start = qstring_start;               \
         tok->length = yytext - qstring_start;     \
         return 1;                                 \
-        } while (0)              
+    } while (0)              
 
 #define BINARY()                                  \
     do {                                          \
@@ -212,7 +212,7 @@ struct token {
         tok->start = qstring_start;               \
         tok->length = yytext - qstring_start + 1; \
         return 1;                                 \
-        } while (0)              
+    } while (0)              
 
 #define BOGUS_BINARY()                            \
     do {                                          \
@@ -221,49 +221,49 @@ struct token {
         tok->start = qstring_start;               \
         tok->length = yytext - qstring_start + 1; \
         return 1;                                 \
-        } while (0)              
+    } while (0)              
 
 
-#define BLOCK_BEGIN()       GOT_TOKEN (TT_BLOCK_BEGIN)
-#define BLOCK_END()         GOT_TOKEN (TT_BLOCK_END)
-#define BOGUS_DATE()        GOT_TOKEN (TT_BOGUS_DATE)
-#define BOGUS_DATETIME()    GOT_TOKEN (TT_BOGUS_DATETIME)
-#define BOGUS_EMAIL()       GOT_TOKEN (TT_BOGUS_EMAIL)
-#define BOGUS_INTEGER()     GOT_TOKEN (TT_BOGUS_INTEGER)
-#define BOGUS_ISODATE()     GOT_TOKEN (TT_BOGUS_ISODATE)
-#define BOGUS_ISODATETIME() GOT_TOKEN (TT_BOGUS_ISODATETIME)
-#define BOGUS_ISOTIME()     GOT_TOKEN (TT_BOGUS_ISOTIME)
-#define BOGUS_TIME()        GOT_TOKEN (TT_BOGUS_TIME)
-#define BOGUS_DOTTED()      GOT_TOKEN (TT_BOGUS_DOTTED)
-#define CHAR()              GOT_TOKEN (TT_CHAR)
-#define COMMENT()           GOT_TOKEN (TT_COMMENT)
-#define DATE()              GOT_TOKEN (TT_DATE)
-#define DATETIME()          GOT_TOKEN (TT_DATETIME)
-#define DOTTED()            GOT_TOKEN (TT_DOTTED)
-#define EMAIL()             GOT_TOKEN (TT_EMAIL)
-#define FILE()              GOT_TOKEN (TT_FILE)
-#define FLOAT()             GOT_TOKEN (TT_FLOAT)
-#define HEADER()            GOT_TOKEN (TT_HEADER)
-#define HEADER1()           GOT_TOKEN (TT_HEADER1)   
-#define INTEGER()           GOT_TOKEN (TT_INTEGER)
-#define ISODATE()           GOT_TOKEN (TT_ISODATE)
-#define ISODATETIME()       GOT_TOKEN (TT_ISODATETIME)
-#define ISOTIME()           GOT_TOKEN (TT_TIME)
-#define ISSUE()             GOT_TOKEN (TT_ISSUE)
-#define MONEY()             GOT_TOKEN (TT_MONEY)
-#define NEWLINE()           GOT_TOKEN (TT_NEWLINE)
-#define PAREN_BEGIN()       GOT_TOKEN (TT_PAREN_BEGIN)
-#define PAREN_END()         GOT_TOKEN (TT_PAREN_END)
-#define UNMATCHED()         GOT_TOKEN (TT_UNMATCHED) 
-#define TIME()              GOT_TOKEN (TT_TIME)
-#define URL()               GOT_TOKEN (TT_URL)
-#define WHITESPACE()        GOT_TOKEN (TT_WHITESPACE)
-#define SYMBOL()              GOT_TOKEN (TT_SYMBOL)
+#define BLOCK_BEGIN()       GOT_TOKEN(TT_BLOCK_BEGIN)
+#define BLOCK_END()         GOT_TOKEN(TT_BLOCK_END)
+#define BOGUS_DATE()        GOT_TOKEN(TT_BOGUS_DATE)
+#define BOGUS_DATETIME()    GOT_TOKEN(TT_BOGUS_DATETIME)
+#define BOGUS_EMAIL()       GOT_TOKEN(TT_BOGUS_EMAIL)
+#define BOGUS_INTEGER()     GOT_TOKEN(TT_BOGUS_INTEGER)
+#define BOGUS_ISODATE()     GOT_TOKEN(TT_BOGUS_ISODATE)
+#define BOGUS_ISODATETIME() GOT_TOKEN(TT_BOGUS_ISODATETIME)
+#define BOGUS_ISOTIME()     GOT_TOKEN(TT_BOGUS_ISOTIME)
+#define BOGUS_TIME()        GOT_TOKEN(TT_BOGUS_TIME)
+#define BOGUS_DOTTED()      GOT_TOKEN(TT_BOGUS_DOTTED)
+#define CHAR()              GOT_TOKEN(TT_CHAR)
+#define COMMENT()           GOT_TOKEN(TT_COMMENT)
+#define DATE()              GOT_TOKEN(TT_DATE)
+#define DATETIME()          GOT_TOKEN(TT_DATETIME)
+#define DOTTED()            GOT_TOKEN(TT_DOTTED)
+#define EMAIL()             GOT_TOKEN(TT_EMAIL)
+#define FILE()              GOT_TOKEN(TT_FILE)
+#define FLOAT()             GOT_TOKEN(TT_FLOAT)
+#define HEADER()            GOT_TOKEN(TT_HEADER)
+#define HEADER1()           GOT_TOKEN(TT_HEADER1)   
+#define INTEGER()           GOT_TOKEN(TT_INTEGER)
+#define ISODATE()           GOT_TOKEN(TT_ISODATE)
+#define ISODATETIME()       GOT_TOKEN(TT_ISODATETIME)
+#define ISOTIME()           GOT_TOKEN(TT_TIME)
+#define ISSUE()             GOT_TOKEN(TT_ISSUE)
+#define MONEY()             GOT_TOKEN(TT_MONEY)
+#define NEWLINE()           GOT_TOKEN(TT_NEWLINE)
+#define PAREN_BEGIN()       GOT_TOKEN(TT_PAREN_BEGIN)
+#define PAREN_END()         GOT_TOKEN(TT_PAREN_END)
+#define UNMATCHED()         GOT_TOKEN(TT_UNMATCHED) 
+#define TIME()              GOT_TOKEN(TT_TIME)
+#define URL()               GOT_TOKEN(TT_URL)
+#define WHITESPACE()        GOT_TOKEN(TT_WHITESPACE)
+#define SYMBOL()            GOT_TOKEN(TT_SYMBOL)
 
 int yylineno;
 int lstring_start_line;
 int lstring_nesting;
-char const * qstring_start;
+char const *qstring_start;
 
 %}
 
@@ -329,54 +329,54 @@ SYMBOL_CONSTITUENT   [a-z0-9/:`!&_?|<=>*~.+-]
 <INITIAL>\[[ \t]*R[a-z]{3}L[ \t]*\[             |
 <INITIAL>\[[ \t]*R[a-z]{2}L[a-z][ \t]*\[        |
 <INITIAL>\[[ \t]*R[a-z]L[a-z]{2}[ \t]*\[        |
-<INITIAL>\[[ \t]*RL[a-z]{3}[ \t]*\[             unput ('['); BEGIN(BODY); HEADER1();
+<INITIAL>\[[ \t]*RL[a-z]{3}[ \t]*\[             unput('['); BEGIN(BODY); HEADER1();
 
 <INITIAL>^[ \t]*R[a-z]{3}L[ \t]*\[             |
 <INITIAL>^[ \t]*R[a-z]{2}L[a-z][ \t]*\[        |
 <INITIAL>^[ \t]*R[a-z]L[a-z]{2}[ \t]*\[        |
-<INITIAL>^[ \t]*RL[a-z]{3}[ \t]*\[             unput ('['); BEGIN(BODY); HEADER();
+<INITIAL>^[ \t]*RL[a-z]{3}[ \t]*\[             unput('['); BEGIN(BODY); HEADER();
 
 <INITIAL>^[ \t]*R[a-z]{3}L[ \t\x0D]*\n[ \t]*\[        |
 <INITIAL>^[ \t]*R[a-z]{2}L[a-z][ \t\x0D]*\n[ \t]*\[   |
 <INITIAL>^[ \t]*R[a-z]L[a-z]{2}[ \t\x0D]*\n[ \t]*\[   |
-<INITIAL>^[ \t]*RL[a-z]{3}[ \t\x0D]*\n[ \t]*\[        yylineno++; unput ('['); BEGIN(BODY); HEADER();
+<INITIAL>^[ \t]*RL[a-z]{3}[ \t\x0D]*\n[ \t]*\[        yylineno++; unput('['); BEGIN(BODY); HEADER();
 
-<INITIAL>\n                           yylineno ++;
+<INITIAL>\n                           yylineno++;
 <INITIAL>.
 
 <BODY>{ISOYEAR}-{ISOMONTH}-{ISODAY}T{ISOHOUR}:{ISOSIXTY}:{ISOSIXTY}({FRACTIME})?[a-z]{NONTERMINAL}  BOGUS_ISODATETIME();
 
 <BODY>{ISOYEAR}-{ISOMONTH}-{ISODAY}T{ISOHOUR}:{ISOSIXTY}:{ISOSIXTY}({FRACTIME})?  ISODATETIME();
 
-<BODY>{ISOYEAR}-{ISOMONTH}-{ISODAY}[a-z]{NONTERMINAL}    BOGUS_ISODATE ();
+<BODY>{ISOYEAR}-{ISOMONTH}-{ISODAY}[a-z]{NONTERMINAL}    BOGUS_ISODATE();
 
 <BODY>{ISOYEAR}-{ISOMONTH}-{ISODAY}                 ISODATE();
 
 <BODY>{DAY}\/{MONTH}\/{YEAR}\/{HOUR}:{SIXTY}:{SIXTY}({FRACTIME})?[a-z]{NONTERMINAL}   |
 <BODY>{DAY}-{MONTH}-{YEAR}\/{HOUR}:{SIXTY}:{SIXTY}({FRACTIME})?[a-z]{NONTERMINAL}     |
-<BODY>[0-9]{4}\/{MONTH}\/{DAY}\/{HOUR}:{SIXTY}:{SIXTY}({FRACTIME})?[a-z]{NONTERMINAL} BOGUS_DATETIME ();
+<BODY>[0-9]{4}\/{MONTH}\/{DAY}\/{HOUR}:{SIXTY}:{SIXTY}({FRACTIME})?[a-z]{NONTERMINAL} BOGUS_DATETIME();
 
 <BODY>{DAY}\/{MONTH}\/{YEAR}\/{HOUR}:{SIXTY}:{SIXTY}({FRACTIME})?   |
 <BODY>{DAY}-{MONTH}-{YEAR}\/{HOUR}:{SIXTY}:{SIXTY}({FRACTIME})?     |
-<BODY>[0-9]{4}\/{MONTH}\/{DAY}\/{HOUR}:{SIXTY}:{SIXTY}({FRACTIME})? DATETIME ();
+<BODY>[0-9]{4}\/{MONTH}\/{DAY}\/{HOUR}:{SIXTY}:{SIXTY}({FRACTIME})? DATETIME();
 
 <BODY>{DAY}\/{MONTH}\/[0-9]{4}{NONTERMINAL}           |
 <BODY>{DAY}-{MONTH}-[0-9]{4}{NONTERMINAL}             |
-<BODY>{DAY}\/{MONTH}\/[0-9]{2,3}[a-z]{NONTERMINAL} |
-<BODY>{DAY}-{MONTH}-[0-9]{2,3}[a-z]{NONTERMINAL}   |
-<BODY>{ISOYEAR}\/{MONTH}\/{DAY}[a-z]{NONTERMINAL}  BOGUS_DATE ();
+<BODY>{DAY}\/{MONTH}\/[0-9]{2,3}[a-z]{NONTERMINAL}    |
+<BODY>{DAY}-{MONTH}-[0-9]{2,3}[a-z]{NONTERMINAL}      |
+<BODY>{ISOYEAR}\/{MONTH}\/{DAY}[a-z]{NONTERMINAL}     BOGUS_DATE();
 
 <BODY>{DAY}\/{MONTH}\/{YEAR}                        |
 <BODY>{DAY}-{MONTH}-{YEAR}                          |
-<BODY>[0-9]{4}\/{MONTH}\/{DAY}                      DATE ();
+<BODY>[0-9]{4}\/{MONTH}\/{DAY}                      DATE();
 
 <BODY>{ISOHOUR}:{ISOSIXTY}:{ISOSIXTY}({FRACTIME})?[a-z]{NONTERMINAL}  |
 <BODY>{ISOHOUR}:{ISOSIXTY}[a-z]{NONTERMINAL}                          |
-<BODY>{ISOSIXTY}:{ISOSIXTY}({FRACTIME})?[a-z]{NONTERMINAL}            BOGUS_ISOTIME ();
+<BODY>{ISOSIXTY}:{ISOSIXTY}({FRACTIME})?[a-z]{NONTERMINAL}            BOGUS_ISOTIME();
 
 <BODY>{ISOHOUR}:{ISOSIXTY}:{ISOSIXTY}({FRACTIME})?  |
 <BODY>{ISOHOUR}:{ISOSIXTY}                          |
-<BODY>{ISOSIXTY}:{ISOSIXTY}({FRACTIME})?            ISOTIME ();
+<BODY>{ISOSIXTY}:{ISOSIXTY}({FRACTIME})?            ISOTIME();
 
 <BODY>{HOUR}:{SIXTY}:{SIXTY}({FRACTIME})?[a-z]{NONTERMINAL} |
 <BODY>{HOUR}:{SIXTY}[a-z]{NONTERMINAL}                      |
@@ -388,7 +388,7 @@ SYMBOL_CONSTITUENT   [a-z0-9/:`!&_?|<=>*~.+-]
 <BODY>{SIXTY}:{SIXTY}\,[a-z]{NONTERMINAL}                   |
 <BODY>:{SIXTY}{FRACTIME}[a-z]{NONTERMINAL}                  |
 <BODY>:{SIXTY}\.[a-z]{NONTERMINAL}                          |
-<BODY>:{SIXTY}\,[a-z]{NONTERMINAL}                          BOGUS_TIME ();
+<BODY>:{SIXTY}\,[a-z]{NONTERMINAL}                          BOGUS_TIME();
 
 <BODY>{HOUR}:{SIXTY}:{SIXTY}({FRACTIME})?           |
 <BODY>{HOUR}:{SIXTY}                                |
@@ -400,12 +400,12 @@ SYMBOL_CONSTITUENT   [a-z0-9/:`!&_?|<=>*~.+-]
 <BODY>{SIXTY}:{SIXTY}\,                             |
 <BODY>:{SIXTY}{FRACTIME}                            |
 <BODY>:{SIXTY}\.                                    |
-<BODY>:{SIXTY}\,                                    TIME ();
+<BODY>:{SIXTY}\,                                   TIME();
 
 <BODY>2#\{         |
 <BODY>8#\{         |
 <BODY>(16)?#\{     |
-<BODY>64#\{        BEGIN (LBIN); lstring_start_line = yylineno; qstring_start = yytext;
+<BODY>64#\{        BEGIN(LBIN); lstring_start_line=yylineno; qstring_start=yytext;
 
 <LBIN>[a-z0-9 ]*
 <LBIN>\n            yylineno++;
@@ -413,9 +413,9 @@ SYMBOL_CONSTITUENT   [a-z0-9/:`!&_?|<=>*~.+-]
 <LBIN>.             BEGIN(BODY); BOGUS_BINARY();
 
 
-<BODY>{TWOFIFTYFIVE}\.{TWOFIFTYFIVE}(\.{TWOFIFTYFIVE})+[a-z]{NONTERMINAL} BOGUS_DOTTED ();
+<BODY>{TWOFIFTYFIVE}\.{TWOFIFTYFIVE}(\.{TWOFIFTYFIVE})+[a-z]{NONTERMINAL} BOGUS_DOTTED();
 
-<BODY>{TWOFIFTYFIVE}\.{TWOFIFTYFIVE}(\.{TWOFIFTYFIVE})+ DOTTED ();
+<BODY>{TWOFIFTYFIVE}\.{TWOFIFTYFIVE}(\.{TWOFIFTYFIVE})+ DOTTED();
 
   /* Note, this catches things like .0foo and lets them drop through to 'SYMBOL'
   ** Necesary for `Alien' script */
@@ -430,13 +430,13 @@ SYMBOL_CONSTITUENT   [a-z0-9/:`!&_?|<=>*~.+-]
 <BODY>[+-]?[0-9][0-9]?[0-9]?[0-9]?('[0-9][0-9][0-9][0-9])+[a-z:'.,-] |
 <BODY>[+-]?[0-9][0-9]?[0-9]?('[0-9][0-9][0-9])+[a-z:'.,-]            |
 <BODY>[+-]?[0-9][0-9]?('[0-9][0-9])+[a-z:'.,-]                       |
-<BODY>[+-]?[0-9]+[a-z:'.,-]                                          BOGUS_INTEGER ();
+<BODY>[+-]?[0-9]+[a-z:'.,-]                                          BOGUS_INTEGER();
 
 
 <BODY>[+-]?[0-9][0-9]?[0-9]?[0-9]?('[0-9][0-9][0-9][0-9])+ |
 <BODY>[+-]?[0-9][0-9]?[0-9]?('[0-9][0-9][0-9])+            |
 <BODY>[+-]?[0-9][0-9]?('[0-9][0-9])+                       |
-<BODY>[+-]?[0-9]+                                          INTEGER ();
+<BODY>[+-]?[0-9]+                                          INTEGER();
 
 <BODY>([a-z]{2,3})?\$[+-]?[0-9']{EXPONENT}                                |
 <BODY>([a-z]{2,3})?\$[+-]?[0-9']+[,.]({EXPONENT})?                        |
@@ -444,37 +444,42 @@ SYMBOL_CONSTITUENT   [a-z0-9/:`!&_?|<=>*~.+-]
 <BODY>([a-z]{2,3})?\$[+-]?[0-9][0-9]?[0-9]?[0-9]?('[0-9][0-9][0-9][0-9])+ |
 <BODY>([a-z]{2,3})?\$[+-]?[0-9][0-9]?[0-9]?('[0-9][0-9][0-9])+            |
 <BODY>([a-z]{2,3})?\$[+-]?[0-9][0-9]?('[0-9][0-9])+                       |
-<BODY>([a-z]{2,3})?\$[+-]?[0-9]+                                          MONEY ();
+<BODY>([a-z]{2,3})?\$[+-]?[0-9]+                                          MONEY();
 
-<BODY>\[                                            BLOCK_BEGIN ();
+<BODY>\[                                            BLOCK_BEGIN();
 
-<BODY>\]                                            BLOCK_END ();
+<BODY>\]                                            BLOCK_END();
 
-<BODY>\(                                            PAREN_BEGIN ();
+<BODY>\(                                            PAREN_BEGIN();
 
-<BODY>\)                                            PAREN_END ();
+<BODY>\)                                            PAREN_END();
 
 <BODY>;[^\n\r]*                                     COMMENT();
 
 <BODY>\"        BEGIN(QSTR); qstring_start = yytext+1;
 <QSTR>\^\"
-<QSTR>\"        BEGIN(BODY); QSTRING ();
-<QSTR>\n        BEGIN(BODY); unput('\n'); BOGUS_QSTRING ();
+<QSTR>\"        BEGIN(BODY); QSTRING();
+<QSTR>\n        BEGIN(BODY); unput('\n'); BOGUS_QSTRING();
 <QSTR>.
 
 
  /* Long strings.  Note that the curly braces *must* properly nest. */
 
-<BODY>\{        { BEGIN(LSTR); 
-                  lstring_start_line = yylineno; 
-                  lstring_nesting = 1;
-                  qstring_start = yytext + 1;
+<BODY>\{        {
+                    BEGIN(LSTR); 
+                    lstring_start_line = yylineno; 
+                    lstring_nesting = 1;
+                    qstring_start = yytext+1;
                 }
                   
 <LSTR>\{        lstring_nesting += 1;
 <LSTR>\n        yylineno++;
-<LSTR>\}        { lstring_nesting -= 1;
-                  if (lstring_nesting == 0) {BEGIN(BODY); LSTRING ();}
+<LSTR>\}        { 
+                    lstring_nesting -= 1;
+                    if (lstring_nesting==0) {
+                        BEGIN(BODY);
+                        LSTRING();
+                    }
                 }
 <LSTR>.
 
@@ -492,7 +497,7 @@ SYMBOL_CONSTITUENT   [a-z0-9/:`!&_?|<=>*~.+-]
 <BODY>{EMAIL_CONSTITUENT}+@{DOMAIN_CONSTITUENT}+(.{DOMAIN_CONSTITUENT}+)*   EMAIL();
 
 
-<BODY>\x0D*\n                              yylineno ++; NEWLINE ();
+<BODY>\x0D*\n                              yylineno++; NEWLINE();
 
 <BODY>[ \t]+                                        WHITESPACE();
 
@@ -507,329 +512,240 @@ SYMBOL_CONSTITUENT   [a-z0-9/:`!&_?|<=>*~.+-]
 %%
 
 void
-generic_out (char const * name, char const * value, int length)
+generic_out(char const *name, char const *value, int length)
 {
     int i;
 
-    printf (",(SHERMAN-%s \"", name);
-    for (i = length; i > 0; i--) {
-        if (strchr ("\"\\", *value) != 0) printf ("\\");
-        printf ("%c", *value++);
-        }
-    printf ("\") ");
+    printf(",(SHERMAN-%s \"", name);
+    for (i=length; i>0; i--) {
+        if (strchr("\"\\", *value) != 0)
+            printf("\\");
+        printf("%c", *value++);
+    }
+    printf("\") ");
 }
 
 int
-main (void)
+main(void)
 {
     int discretionary_space = 0;
     struct token result;
-    char const * ptr;
+    char const *ptr;
     int i;
 
     yylineno = 1;
 
-    printf ("`(SHERMAN ,(LIST->BLOCK `(");
+    printf("`(SHERMAN ,(LIST->BLOCK `(");
 
-    while (yylex (&result) != 0) {
+    while (yylex(&result) != 0) {
         switch (result.tt) {
 
-          case TT_BLOCK_BEGIN:
-            printf (",(LIST->BLOCK `(");
+        case TT_BLOCK_BEGIN:
+            printf(",(LIST->BLOCK `(");
             break;
 
-          case TT_BLOCK_END:
-            printf (")) ");   /* Space just in case */
+        case TT_BLOCK_END:
+            printf(")) ");   /* Space just in case */
             discretionary_space = 1;
             break;
 
-          case TT_BOGUS_BINARY:
-            printf ("Malformed BINARY, line %d", result.line_number);
-            exit (EXIT_FAILURE);
+        case TT_BOGUS_BINARY:
+            printf("Malformed BINARY, line %d", result.line_number);
+            exit(EXIT_FAILURE);
             break;
 
-          case TT_BOGUS_DATE:        
-            printf ("Malformed DATE, line %d", result.line_number);
-            exit (EXIT_FAILURE);
+        case TT_BOGUS_DATE:        
+            printf("Malformed DATE, line %d", result.line_number);
+            exit(EXIT_FAILURE);
             break;
                                      
-          case TT_BOGUS_DATETIME:    
-            printf ("Malformed DATETIME, line %d", result.line_number);
-            exit (EXIT_FAILURE);
+        case TT_BOGUS_DATETIME:    
+            printf("Malformed DATETIME, line %d", result.line_number);
+            exit(EXIT_FAILURE);
             break;
                                      
-          case TT_BOGUS_EMAIL:       
-            printf ("Malformed EMAIL, line %d", result.line_number);
-            exit (EXIT_FAILURE);
+        case TT_BOGUS_EMAIL:       
+            printf("Malformed EMAIL, line %d", result.line_number);
+            exit(EXIT_FAILURE);
             break;
 
-          case TT_BOGUS_INTEGER:     
-            printf ("Malformed INTEGER, line %d", result.line_number);
-            exit (EXIT_FAILURE);
+        case TT_BOGUS_INTEGER:     
+            printf("Malformed INTEGER, line %d", result.line_number);
+            exit(EXIT_FAILURE);
             break;
                                      
-          case TT_BOGUS_ISODATE:     
-            printf ("Malformed ISODATE, line %d", result.line_number);
-            exit (EXIT_FAILURE);
+        case TT_BOGUS_ISODATE:     
+            printf("Malformed ISODATE, line %d", result.line_number);
+            exit(EXIT_FAILURE);
             break;
                                      
-          case TT_BOGUS_ISODATETIME: 
-            printf ("Malformed ISODATETIME, line %d", result.line_number);
-            exit (EXIT_FAILURE);
+        case TT_BOGUS_ISODATETIME: 
+            printf("Malformed ISODATETIME, line %d", result.line_number);
+            exit(EXIT_FAILURE);
             break;
                                      
-          case TT_BOGUS_ISOTIME:     
-            printf ("Malformed ISOTIME, line %d", result.line_number);
-            exit (EXIT_FAILURE);
+        case TT_BOGUS_ISOTIME:     
+            printf("Malformed ISOTIME, line %d", result.line_number);
+            exit(EXIT_FAILURE);
             break;
                                      
-          case TT_BOGUS_TIME:        
-            printf ("Malformed TIME, line %d", result.line_number);
-            exit (EXIT_FAILURE);
+        case TT_BOGUS_TIME:        
+            printf("Malformed TIME, line %d", result.line_number);
+            exit(EXIT_FAILURE);
             break;
                                      
-          case TT_BOGUS_DOTTED:      
-            printf ("Malformed DOTTED, line %d", result.line_number);
-            exit (EXIT_FAILURE);
+        case TT_BOGUS_DOTTED:      
+            printf("Malformed DOTTED, line %d", result.line_number);
+            exit(EXIT_FAILURE);
             break;
 
-          case TT_COMMENT:
-              ptr = result.start;
-              for (i = result.length; i > 0; i--)
-                  printf ("%c", *ptr++);
-              discretionary_space = 0;
-              break;
-
-          case TT_DATE:
-            generic_out ("DATE", result.start, result.length);
-            break;
-
-          case TT_DATETIME:
-            generic_out ("DATETIME", result.start, result.length);
-            break;
-
-          case TT_DOTTED:
-            printf ("(DOTTED #(");
+        case TT_COMMENT:
             ptr = result.start;
-            for (i = result.length; i > 0; i--) {
-                char const c = *ptr++;
-                if (c == '.')
-                   printf (" ");
-                else
-                   printf ("%c", c);
-                }
-          
-            printf (")) ");
-            discretionary_space = 1;
-            break;
-
-          case TT_EMAIL:
-            generic_out ("EMAIL", result.start, result.length);
-            break;
-
-          case TT_FILE:
-            generic_out ("FILE", result.start + 1, result.length - 1);
-            break;
-
-          case TT_FLOAT:
-            printf ("#i");
-            ptr = result.start;
-            for (i = result.length; i > 0; i--) {
-                char const c = *ptr ++;
-                if (c == '\'') continue;
-                if (c == ',')
-                    printf ("."); 
-                else
-                    printf ("%c", c);
-                }
-            break;
-
-          case TT_HEADER:
-            break;
-
-          case TT_HEADER1:
-            printf ("*** CANNOT RECOGNIZE HEADER1 YET ***"); 
-            exit (EXIT_FAILURE);
-
-          case TT_INTEGER:
-            ptr = result.start;
-            for (i = result.length; i > 0; i--) {
-                if (*ptr == '\'') continue;
-                printf ("%c", *ptr++);
-                }
-            break;
-
-          case TT_ISODATE:
-            generic_out ("ISODATE", result.start, result.length);
-            break;
-
-          case TT_ISODATETIME:
-            generic_out ("ISODATETIME", result.start, result.length);
-            break;
-
-          case TT_ISOTIME:
-            generic_out ("ISOTIME", result.start, result.length);
-            break;
-
-          case TT_NEWLINE:
-            printf ("\n");
+            for (i=result.length; i>0; i--)
+                printf("%c", *ptr++);
             discretionary_space = 0;
             break;
 
-          case TT_PAREN_BEGIN:
-            printf ("(");
+        case TT_DATE:
+            generic_out("DATE", result.start, result.length);
             break;
 
-          case TT_PAREN_END:
-            printf (") ");
+        case TT_DATETIME:
+            generic_out("DATETIME", result.start, result.length);
+            break;
+
+        case TT_DOTTED:
+            printf("(DOTTED #(");
+            ptr = result.start;
+            for (i=result.length; i>0; i--) {
+                char const c = *ptr++;
+                if (c == '.') {
+                   printf(" ");
+                } else {
+                   printf("%c", c);
+                }
+            }
+          
+            printf(")) ");
             discretionary_space = 1;
             break;
 
-          case TT_QSTRING:
-          case TT_LSTRING:
-              ptr = result.start;
-              printf ("\"");
-              for (i = result.length; i > 0; i--) {
-                  char c = *ptr++;
-                  if (strchr ("\"\\",c) != 0) printf ("\\");
-                  printf ("%c", c);
-                  }
-              printf ("\" ");
-              discretionary_space = 1;
-              break;
-
-          case TT_SYMBOL:
-              ptr = result.start;
-              for (i = result.length; i > 0; i--) {
-                  char c = *ptr++;
-                  if (strchr ("|.`'\"\\",c) != 0) printf ("\\");
-                  printf ("%c", c);
-                  }
-              printf (" "); /* just in case */
-              discretionary_space = 1;
-              break;
-
-          case TT_TIME:
-            generic_out ("TIME", result.start,  result.length);
+        case TT_EMAIL:
+            generic_out("EMAIL", result.start, result.length);
             break;
 
-          case TT_URL:
-            generic_out ("URL", result.start,  result.length);
+        case TT_FILE:
+            generic_out("FILE", result.start+1, result.length-1);
             break;
 
-
-          case TT_WHITESPACE:
-              ptr = result.start;
-              for (i = result.length - discretionary_space; i > 0; i--) {
-                  char c = *ptr++;
-                  printf ("%c", c);
-                  }
-              discretionary_space = 0;
-              break;
-
-          default:
-            printf ("LEXER_ERROR");
-            exit (EXIT_FAILURE);
-
+        case TT_FLOAT:
+            printf("#i");
+            ptr = result.start;
+            for (i=result.length; i>0; i--) {
+                char const c = *ptr++;
+                if (c == '\'')
+                    continue;
+                if (c == ',') {
+                    printf("."); 
+                } else {
+                    printf("%c", c);
+                }
             }
+            break;
+
+        case TT_HEADER:
+            break;
+
+        case TT_HEADER1:
+            printf("*** CANNOT RECOGNIZE HEADER1 YET ***"); 
+            exit(EXIT_FAILURE);
+
+        case TT_INTEGER:
+            ptr = result.start;
+            for (i=result.length; i>0; i--) {
+                if (*ptr == '\'')
+                    continue;
+                printf("%c", *ptr++);
+            }
+            break;
+
+        case TT_ISODATE:
+            generic_out("ISODATE", result.start, result.length);
+            break;
+
+        case TT_ISODATETIME:
+            generic_out("ISODATETIME", result.start, result.length);
+            break;
+
+        case TT_ISOTIME:
+            generic_out("ISOTIME", result.start, result.length);
+            break;
+
+        case TT_NEWLINE:
+            printf("\n");
+            discretionary_space = 0;
+            break;
+
+        case TT_PAREN_BEGIN:
+            printf("(");
+            break;
+
+        case TT_PAREN_END:
+            printf(") ");
+            discretionary_space = 1;
+            break;
+
+        case TT_QSTRING:
+        case TT_LSTRING:
+            ptr = result.start;
+            printf("\"");
+            for (i=result.length; i>0; i--) {
+                char c = *ptr++;
+                if (strchr("\"\\",c) != 0)
+                  printf("\\");
+                printf("%c", c);
+            }
+            printf("\" ");
+            discretionary_space = 1;
+            break;
+
+        case TT_SYMBOL:
+            ptr = result.start;
+            for (i=result.length; i>0; i--) {
+                char c = *ptr++;
+                if (strchr("|.`'\"\\",c) != 0)
+                    printf("\\");
+                printf("%c", c);
+            }
+            printf(" "); /* just in case */
+            discretionary_space = 1;
+            break;
+
+        case TT_TIME:
+            generic_out("TIME", result.start, result.length);
+            break;
+
+        case TT_URL:
+            generic_out("URL", result.start, result.length);
+            break;
+
+
+        case TT_WHITESPACE:
+            ptr = result.start;
+            for (i=result.length-discretionary_space; i>0; i--) {
+                char c = *ptr++;
+                printf("%c", c);
+            }
+            discretionary_space = 0;
+            break;
+
+        default:
+            printf("LEXER_ERROR");
+            exit(EXIT_FAILURE);
+
         }
-    printf ("\n))) ;; END of SHERMAN CODE");
-    exit (EXIT_SUCCESS);
+    }
+    printf("\n))) ;; END of SHERMAN CODE");
+    exit(EXIT_SUCCESS);
 }
     
-#if 0    
-
-
-          case TT_BINARY:            printf ("BINARY"); break;
-
-          case TT_BLOCK_BEGIN:       printf ("BLOCK_BEGIN %d]\n", result.line_number);
-                                     continue; /* special */
-
-          case TT_BLOCK_END:         printf ("BLOCK_END %d]\n", result.line_number); 
-                                     continue; /* special */
-
-          case TT_BOGUS_BINARY:      printf ("BOGUS_BINARY"); break;
-
-          case TT_BOGUS_DATE:        printf ("BOGUS_DATE"); break;
-
-          case TT_BOGUS_DATETIME:    printf ("BOGUS_DATETIME"); break;
-
-          case TT_BOGUS_EMAIL:       printf ("BOGUS_EMAIL"); break;
-
-          case TT_BOGUS_INTEGER:     printf ("BOGUS_INTEGER"); break;    
-
-          case TT_BOGUS_ISODATE:     printf ("BOGUS_ISODATE"); break;
-
-          case TT_BOGUS_ISODATETIME: printf ("BOGUS_ISODATETIME"); break;
-
-          case TT_BOGUS_ISOTIME:     printf ("BOGUS_ISOTIME"); break;
-
-          case TT_BOGUS_TIME:        printf ("BOGUS_TIME"); break;
-
-          case TT_BOGUS_DOTTED:      printf ("BOGUS_TIME"); break;
-
-          case TT_CHAR:              printf ("CHAR"); break;
-
-          case TT_COMMENT:           printf ("COMMENT"); break;
-
-          case TT_DATE:              printf ("DATE"); break;
-
-          case TT_DATETIME:          printf ("DATETIME"); break;
-
-          case TT_EMAIL:             printf ("EMAIL"); break;
-
-          case TT_FILE:              printf ("FILE"); break;
-
-          case TT_FLOAT:             printf ("FLOAT"); break;
-
-          case TT_HEADER:            printf ("HEADER %d]\n", result.line_number);
-                                     continue; /* special */
-
-          case TT_HEADER1:           printf ("HEADER1 %d]\n", result.line_number);
-                                     continue; /* special */
-
-          case TT_INTEGER:           printf ("INTEGER"); break;
-
-          case TT_ISODATE:           printf ("ISODATE"); break;
-
-          case TT_ISODATETIME:       printf ("ISODATETIME"); break;
-
-          case TT_ISOTIME:           printf ("ISOTIME"); break;
-
-          case TT_ISSUE:             printf ("ISSUE"); break;
-
-          case TT_LSTRING:           printf ("LSTRING"); break;
-
-          case TT_MONEY:             printf ("MONEY"); break;
-
-          case TT_NEWLINE:           printf ("NEWLINE]\n"); continue; /* special */
-
-          case TT_PAREN_BEGIN:       printf ("PAREN_BEGIN %d]\n", result.line_number);
-                                     continue; /* special */
-
-          case TT_PAREN_END:         printf ("PAREN_END %d]\n", result.line_number); 
-                                     continue; /* special */
-          case TT_QSTRING:           printf ("QSTRING"); break;
-
-          case TT_SYMBOL:            printf ("SYMBOL"); break;
-
-          case TT_TIME:              printf ("TIME"); break;
-
-          case TT_DOTTED:            printf ("DOTTED"); break;
-
-          case TT_UNMATCHED:         printf ("UNMATCHED_TOKEN"); break;
-
-          case TT_URL:               printf ("URL"); break;
-
-          case TT_WHITESPACE:        printf ("WHITESPACE]\n"); continue; /* special */
-
-          }
-        printf (" %d \"", result.line_number);
-        ptr = result.start;
-        for (i = result.length; i > 0; i--) printf ("%c", *ptr++);
-        printf ("\"]\n");
-        }
-    exit (EXIT_SUCCESS);
-}
-
-#endif
