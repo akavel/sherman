@@ -562,7 +562,7 @@ main (void)
             printf ("Malformed EMAIL, line %d", result.line_number);
             exit (EXIT_FAILURE);
             break;
-	                             
+
           case TT_BOGUS_INTEGER:     
             printf ("Malformed INTEGER, line %d", result.line_number);
             exit (EXIT_FAILURE);
@@ -614,7 +614,7 @@ main (void)
             for (i = result.length; i > 0; i--) {
                 char const c = *ptr++;
                 if (c == '.')
-	           printf (" ");
+                   printf (" ");
                 else
                    printf ("%c", c);
                 }
@@ -674,7 +674,7 @@ main (void)
           case TT_NEWLINE:
             printf ("\n");
             discretionary_space = 0;
-	    break;
+            break;
 
           case TT_PAREN_BEGIN:
             printf ("(");
@@ -740,12 +740,12 @@ main (void)
 #if 0    
 
 
-	  case TT_BINARY:            printf ("BINARY"); break;
+          case TT_BINARY:            printf ("BINARY"); break;
 
-	  case TT_BLOCK_BEGIN:       printf ("BLOCK_BEGIN %d]\n", result.line_number);
+          case TT_BLOCK_BEGIN:       printf ("BLOCK_BEGIN %d]\n", result.line_number);
                                      continue; /* special */
 
-	  case TT_BLOCK_END:         printf ("BLOCK_END %d]\n", result.line_number); 
+          case TT_BLOCK_END:         printf ("BLOCK_END %d]\n", result.line_number); 
                                      continue; /* special */
 
           case TT_BOGUS_BINARY:      printf ("BOGUS_BINARY"); break;
@@ -755,7 +755,7 @@ main (void)
           case TT_BOGUS_DATETIME:    printf ("BOGUS_DATETIME"); break;
 
           case TT_BOGUS_EMAIL:       printf ("BOGUS_EMAIL"); break;
-	
+
           case TT_BOGUS_INTEGER:     printf ("BOGUS_INTEGER"); break;    
 
           case TT_BOGUS_ISODATE:     printf ("BOGUS_ISODATE"); break;
@@ -770,7 +770,7 @@ main (void)
 
           case TT_CHAR:              printf ("CHAR"); break;
 
-	  case TT_COMMENT:           printf ("COMMENT"); break;
+          case TT_COMMENT:           printf ("COMMENT"); break;
 
           case TT_DATE:              printf ("DATE"); break;
 
@@ -788,7 +788,7 @@ main (void)
           case TT_HEADER1:           printf ("HEADER1 %d]\n", result.line_number);
                                      continue; /* special */
 
-	  case TT_INTEGER:           printf ("INTEGER"); break;
+          case TT_INTEGER:           printf ("INTEGER"); break;
 
           case TT_ISODATE:           printf ("ISODATE"); break;
 
@@ -798,16 +798,16 @@ main (void)
 
           case TT_ISSUE:             printf ("ISSUE"); break;
 
-	  case TT_LSTRING:           printf ("LSTRING"); break;
+          case TT_LSTRING:           printf ("LSTRING"); break;
 
           case TT_MONEY:             printf ("MONEY"); break;
 
           case TT_NEWLINE:           printf ("NEWLINE]\n"); continue; /* special */
 
-	  case TT_PAREN_BEGIN:       printf ("PAREN_BEGIN %d]\n", result.line_number);
+          case TT_PAREN_BEGIN:       printf ("PAREN_BEGIN %d]\n", result.line_number);
                                      continue; /* special */
 
-	  case TT_PAREN_END:         printf ("PAREN_END %d]\n", result.line_number); 
+          case TT_PAREN_END:         printf ("PAREN_END %d]\n", result.line_number); 
                                      continue; /* special */
           case TT_QSTRING:           printf ("QSTRING"); break;
 
@@ -816,12 +816,12 @@ main (void)
           case TT_TIME:              printf ("TIME"); break;
 
           case TT_DOTTED:            printf ("DOTTED"); break;
-	
+
           case TT_UNMATCHED:         printf ("UNMATCHED_TOKEN"); break;
 
           case TT_URL:               printf ("URL"); break;
 
-	  case TT_WHITESPACE:        printf ("WHITESPACE]\n"); continue; /* special */
+          case TT_WHITESPACE:        printf ("WHITESPACE]\n"); continue; /* special */
 
           }
         printf (" %d \"", result.line_number);
