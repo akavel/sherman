@@ -163,11 +163,11 @@ enum token_type {
 struct token {
     enum token_type tt;
     int line_number;
-    char const * start;
+    char const *start;
     int length;
 };
 
-#define YY_DECL int yylex (struct token * tok)
+#define YY_DECL  int yylex(struct token *tok)
 
 #define GOT_TOKEN(type)              \
     do {                             \
