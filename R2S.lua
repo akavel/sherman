@@ -69,6 +69,7 @@ local rebol = P{
 		V'integer' / function(s)
 			write(s:gsub("'", ""))
 		end +
+		V'comment' / write +
 		V'qstr' / function(s)
 			write('"'..s:gsub("[\"\\]", escape)..'" ')
 			discretionary_space = 1
@@ -94,7 +95,7 @@ local rebol = P{
 		end
 	)^0,
 	symbol =    -- FIXME: add the rest of patterns
-		symbol_initial * symbol_constituent^0,
+		P':'^-1 * symbol_initial * symbol_constituent^0,
 	integer =   -- FIXME: add the rest of patterns
 		sign^-1 * digit^1,
 	qstr =
@@ -102,7 +103,9 @@ local rebol = P{
 			P'^"' +
 			P(1)-'"'
 		)^0) *
-		P'"'
+		P'"',
+	comment =
+		P';' * (P(1)-S'\n\r')^0,
 }
 
 write '`(SHERMAN ,(LIST->BLOCK `('
