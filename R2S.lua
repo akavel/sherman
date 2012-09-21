@@ -11,6 +11,7 @@ function parse(code)
 -- LPEG shorthands
 local Cc = lpeg.Cc
 local Cf = lpeg.Cf
+local C = lpeg.C
 local V = lpeg.V
 local S = lpeg.S
 local P = lpeg.P
@@ -35,6 +36,11 @@ end
 local function write(s)
 	io.write(s)
 end
+local function escape(s)
+	return '\\'..s
+end
+
+-- utility patterns
 local whitespace = S' \t'^1
 local newline = P'\n' / function()
 	line = line+1 
@@ -63,6 +69,10 @@ local rebol = P{
 		V'integer' / function(s)
 			write(s:gsub("'", ""))
 		end +
+		V'qstr' / function(s)
+			write('"'..s:gsub("[\"\\]", escape)..'" ')
+			discretionary_space = 1
+		end +
 		P'[' / function()
 			write ',(LIST->BLOCK `('
 		end +
@@ -78,9 +88,7 @@ local rebol = P{
 			discretionary_space = 0
 		end +
 		V'symbol' / function(s)
-			write(s:gsub("[|.`'\"\\]", function(c)
-				return '\\'..c
-			end))
+			write(s:gsub("[|.`'\"\\]", escape))
 			write ' '  -- just in case
 			discretionary_space = 1
 		end
@@ -88,7 +96,13 @@ local rebol = P{
 	symbol =    -- FIXME: add the rest of patterns
 		symbol_initial * symbol_constituent^0,
 	integer =   -- FIXME: add the rest of patterns
-		sign^-1 * digit^1
+		sign^-1 * digit^1,
+	qstr =
+		P'"' * C((
+			P'^"' +
+			P(1)-'"'
+		)^0) *
+		P'"'
 }
 
 write '`(SHERMAN ,(LIST->BLOCK `('
