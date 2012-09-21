@@ -39,6 +39,10 @@ end
 local function escape(s)
 	return '\\'..s
 end
+local function handlestring(s)
+	write('"'..s:gsub("[\"\\]", escape)..'" ')
+	discretionary_space = 1
+end
 
 -- utility patterns
 local whitespace = S' \t'^1
@@ -70,10 +74,8 @@ local rebol = P{
 			write(s:gsub("'", ""))
 		end +
 		V'comment' / write +
-		V'qstr' / function(s)
-			write('"'..s:gsub("[\"\\]", escape)..'" ')
-			discretionary_space = 1
-		end +
+		V'qstr' / handlestring +
+		V'lstr' / handlestring +
 		P'[' / function()
 			write ',(LIST->BLOCK `('
 		end +
@@ -106,6 +108,13 @@ local rebol = P{
 		P'"',
 	comment =
 		P';' * (P(1)-S'\n\r')^0,
+	lstr =      -- Long strings.  Note that the curly braces *must* properly nest.
+		P'{' * C((
+			V'lstr' +
+			newline +
+			P(1)-'}'
+		)^0) *
+		P'}',
 }
 
 write '`(SHERMAN ,(LIST->BLOCK `('
