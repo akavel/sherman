@@ -19,8 +19,6 @@ local l_traceback = debug.traceback
 local l_setmetatable = setmetatable
 local l_tconcat = table.concat
 
-module("scheme")
-
 -- the global environment
 local global_env = {}
 
@@ -952,8 +950,10 @@ add_primitive("doc", doc, 1)
 -- Module interface
 --
 
+local M = {}
+
 -- loads files
-function load(fname)
+function M.load(fname)
 	local status, exp
 
 	if (not fname) or fname == "" then
@@ -999,7 +999,7 @@ function load(fname)
 end
 
 -- the REPL
-function repl()
+function M.repl()
 	local function toplevel()
 		local status, exp
 		l_io_write("scheme> ")
@@ -1031,3 +1031,6 @@ function repl()
 	end
 	return toplevel()
 end
+
+_G.scheme = M
+return M
