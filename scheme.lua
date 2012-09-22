@@ -960,10 +960,16 @@ function M.load(fname)
 		return
 	end
 
-	local port, err = l_io_open(fname, "rb")
-	if not port then
-		l_io_write("Error opening Scheme file: " .. err)
-		return
+	local port
+	if l_type(fname) == "string" then
+		local err
+		port, err = l_io_open(fname, "rb")
+		if not port then
+			l_io_write("Error opening Scheme file: " .. err)
+			return
+		end
+	else
+		port = fname
 	end
 
 	while true do
@@ -1030,6 +1036,26 @@ function M.repl()
 		return toplevel()
 	end
 	return toplevel()
+end
+
+M.add_primitive = add_primitive
+
+function M.run(code)
+	local fake_file = {
+		code = code,
+		pos = 0,
+		read = function(self, arg)
+			if self.pos >= #self.code then
+				return nil
+			end
+			if arg ~= 1 then
+				panic('scheme.run: fake_file:read('..tostring(arg)..')')
+			end
+			self.pos = self.pos + 1
+			return code:sub(self.pos, self.pos)
+		end
+	}
+	M.load(fake_file)
 end
 
 _G.scheme = M
