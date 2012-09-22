@@ -37,54 +37,51 @@ local undef_obj = {}
 local bool_true = {}
 local bool_false = {}
 
-local function is_char(obj)
-	return l_type(obj) == "table" and obj[1] == "char"
-end
-
 local function is_nil(obj)
 	return obj == nil_obj
 end
-
+local function is_true(obj)
+	return obj ~= bool_false
+end
 local function is_number(obj)
 	return l_type(obj) == "number"
 end
-
-local function is_pair(obj)
-	return l_type(obj) == "table" and obj[1] == "pair"
-end
-
-local function is_continuation(obj)
-	return l_type(obj) == "table" and obj[1] == "continuation"
-end
-
-local function is_primitive(obj)
-	return l_type(obj) == "table" and obj[1] == "primitive"
-end
-
-local function is_procedure(obj)
-	return l_type(obj) == "table" and obj[1] == "procedure"
-end
-
 local function is_symbol(obj)
 	return l_type(obj) == "string"
 end
 
+
+local function is(obj, kind)
+	return l_type(obj)=="table" and obj[1]==kind
+end
+local function is_char(obj)
+	return is(obj, "char")
+end
+local function is_pair(obj)
+	return is(obj, "pair")
+end
+local function is_continuation(obj)
+	return is(obj, "continuation")
+end
+local function is_primitive(obj)
+	return is(obj, "primitive")
+end
+local function is_procedure(obj)
+	return is(obj, "procedure")
+end
 local function is_string(obj)
-	return l_type(obj) == "table" and obj[1] == "string"
+	return is(obj, "string")
 end
-
-local function is_true(obj)
-	return obj ~= bool_false
-end
-
 local function is_vector(obj)
-	return l_type(obj) == "table" and obj[1] == "vector"
+	return is(obj, "vector")
 end
 
 local function make_string(str)
-	strobj = {[1] = "string"}
+	local strobj = {
+		[1] = "string"
+	}
 	for i = 1, #str do
-	strobj[i+1] = str:sub(i,i)
+		strobj[i+1] = str:sub(i,i)
 	end
 	return strobj
 end
@@ -106,69 +103,41 @@ local function make_pair(x, y)
 	return pair
 end
 
+local function verify(x, kind)
+	if not is(x, kind) then
+		l_error("Not a " .. kind)
+	end
+	return x
+end
+
 local function make_continuation(cont)
 	return {[1] = "continuation", [2] = cont}
 end
-
 local function continuation_procedure(cont)
-	if is_continuation(cont) then
-		return cont[2]
-	else
-		l_error("Not a continuation")
-	end
+	return verify(cont, "continuation")[2]
 end
 
 local function make_primitive(f, arity)
 	return {[1] = "primitive", [2] = f, [3] = arity}
 end
-
 local function primitive_function(pri)
-	if is_primitive(pri) then
-		return pri[2]
-	else
-		l_error("Not a primitive")
-	end
+	return verify(pri, "primitive")[2]
 end
-
 local function primitive_arity(pri)
-	if is_primitive(pri) then
-		return pri[3]
-	else
-		l_error("Not a primitive")
-	end
+	return verify(pri, "primitive")[3]
 end
 
 local function make_procedure(args, env, body)
 	return {[1] = "procedure", [2] = args, [3] = env, [4] = body, ["doc"] = ""}
 end
-
 local function procedure_args(proc)
-	if is_procedure(proc) then
-		return proc[2]
-	else
-		l_error("Not a procedure")
-	end
+	return verify(proc, "procedure")[2]
 end
-
 local function procedure_env(proc)
-	if is_procedure(proc) then
-		return proc[3]
-	else
-		l_error("Not a procedure")
-	end
+	return verify(proc, "procedure")[3]
 end
-
 local function procedure_body(proc)
-	if is_procedure(proc) then
-		return proc[4]
-	else
-		l_error("Not a procedure")
-	end
-end
-
-local function add_primitive(name, f, arity)
-	local pri = make_primitive(f, arity)
-	global_env[name] = pri
+	return verify(proc, "procedure")[4]
 end
 
 --
@@ -184,29 +153,29 @@ local function nullp(obj)
 end
 
 local function make_numerical_comparator(comp)
-	return function (...)
+	return function(...)
 		local args = {...}
 
 		if #args < 2 then
 			l_error("Comparison of less than two elements")
-		else
-			local test = args[1]
-			if not is_number(test) then
+		end
+
+		local test = args[1]
+		if not is_number(test) then
+			l_error("Numerical comparator applied to non-number")
+		end
+		for i = 2, #args do
+			local val = args[i]
+			if not is_number(val) then
 				l_error("Numerical comparator applied to non-number")
 			end
-			for i = 2, #args do
-				local val = args[i]
-				if not is_number(val) then
-					l_error("Numerical comparator applied to non-number")
-				end
-				if not comp(test, val) then
-					return bool_false
-				end
-				test = val
+			if not comp(test, val) then
+				return bool_false
 			end
-
-			return bool_true
+			test = val
 		end
+
+		return bool_true
 	end
 end
 
@@ -221,16 +190,16 @@ local function add(...)
 
 	if #args == 0 then
 		return 0
-	else
-		local sum = 0
-		for i = 1, #args do
-			if not is_number(args[i]) then
-				l_error("Adding non-number")
-			end
-			sum = sum + args[i]
-		end
-		return sum
 	end
+
+	local sum = 0
+	for i = 1, #args do
+		if not is_number(args[i]) then
+			l_error("Adding non-number")
+		end
+		sum = sum + args[i]
+	end
+	return sum
 end
 
 local function sub(...)
@@ -238,21 +207,22 @@ local function sub(...)
 
 	if #args == 0 then
 		l_error("No arguments to subtraction procedure")
-	elseif #args == 1 then
+	end
+	if #args == 1 then
 		if not is_number(args[1]) then
 			l_error("Subtracting non-number")
 		end
 		return 0 - args[1]
-	else
-		local res = args[1]
-		for i = 2, #args do
-			if not is_number(args[i]) then
-				l_error("Subtracting non-number")
-			end
-			res = res - args[i]
-		end
-		return res
 	end
+
+	local res = args[1]
+	for i = 2, #args do
+		if not is_number(args[i]) then
+			l_error("Subtracting non-number")
+		end
+		res = res - args[i]
+	end
+	return res
 end
 
 local function mul(...)
@@ -260,16 +230,16 @@ local function mul(...)
 
 	if #args == 0 then
 		return 1
-	else
-		local prod = 1
-		for i = 1, #args do
-			if not is_number(args[i]) then
-				l_error("Multiplying non-number")
-			end
-			prod = prod * args[i]
-		end
-		return prod
 	end
+
+	local prod = 1
+	for i = 1, #args do
+		if not is_number(args[i]) then
+			l_error("Multiplying non-number")
+		end
+		prod = prod * args[i]
+	end
+	return prod
 end
 
 local function div(...)
@@ -277,7 +247,8 @@ local function div(...)
 
 	if #args == 0 then
 		l_error("No arguments to division procedure")
-	elseif #args == 1 then
+	end
+	if #args == 1 then
 		if not is_number(args[1]) then
 			l_error("Dividing non-number")
 		end
@@ -285,19 +256,19 @@ local function div(...)
 			l_error("Dividing by zero")
 		end
 		return 1 / args[1]
-	else
-		local res = args[1]
-		for i = 2, #args do
-			if not is_number(args[i]) then
-				l_error("Dividing non-number")
-			end
-			if args[i] == 0 then
-				l_error("Dividing by zero")
-			end
-			res = res / args[i]
-		end
-		return res
 	end
+
+	local res = args[1]
+	for i = 2, #args do
+		if not is_number(args[i]) then
+			l_error("Dividing non-number")
+		end
+		if args[i] == 0 then
+			l_error("Dividing by zero")
+		end
+		res = res / args[i]
+	end
+	return res
 end
 
 local function cons(x, y)
@@ -305,65 +276,48 @@ local function cons(x, y)
 end
 
 local function car(obj)
-	if is_pair(obj) then
-		return obj[2]
-	else
+	if not is_pair(obj) then
 		l_error("Not a pair passed to CAR")
 	end
+	return obj[2]
 end
 
 local function cdr(obj)
-	if is_pair(obj) then
-		return obj[3]
-	else
+	if not is_pair(obj) then
 		l_error("Not a pair passed to CDR")
 	end
+	return obj[3]
 end
 
 local function length(obj)
-	local function l(p, n)
-		local d = cdr(p)
-
+	local function l(d, n)
 		if is_nil(d) then
 			return n
 		elseif is_pair(d) then
-			return l(d, n + 1)
+			return l(cdr(d), n + 1)
 		else
 			l_error("List expected")
 		end
 	end
-
-	if is_nil(obj) then
-		return 0
-	elseif is_pair(obj) then
-		return l(obj, 1)
-	else
-		l_error("List expected")
-	end
+	return l(obj, 0)
 end
 
 local function doc(obj)
-	if is_nil(obj) then
-		return ""
-	elseif is_procedure(obj) then
-		return obj["doc"]
-	else
+	if not is_procedure(obj) then
 		return ""
 	end
+	return obj["doc"]
 end
 
 local function cadr(obj)
 	return car(cdr(obj))
 end
-
 local function cddr(obj)
 	return cdr(cdr(obj))
 end
-
 local function caddr(obj)
 	return car(cdr(cdr(obj)))
 end
-
 local function cadddr(obj)
 	return car(cdr(cdr(cdr(obj))))
 end
@@ -413,8 +367,9 @@ local function read(port)
 			
 			while true do
 				char = peek_char()
-				if is_space(char) or char == nil or char == "(" or char == ")"
-										or char == "\"" or char == ";" then
+				if is_space(char) or char == nil
+						or char == "(" or char == ")"
+						or char == "\"" or char == ";" then
 					return l_tconcat(str)
 				else
 					str[#str+1] = get_char()
@@ -599,17 +554,15 @@ local function read(port)
 			local rest = read_till_delimiter()
 			if rest == "" then
 				return char
+			end
+			local num = l_tonumber(rest)
+			if not num then
+				l_error("Unknown read syntax: " .. char .. rest)
+			end
+			if char == "+" then
+				return num
 			else
-				local num = l_tonumber(rest)
-				if num then
-					if char == "+" then
-						return num
-					else
-						return -num
-					end
-				else
-					l_error("Unknown read syntax: " .. char .. rest)
-				end
+				return -num
 			end
 		elseif char == "." then
 			local rest = read_till_delimiter()
@@ -659,7 +612,9 @@ local function write(exp, port)
 		l_write("(")
 		local first = true
 		while true do
-			if not first then l_write(" ") end
+			if not first then
+				l_write(" ")
+			end
 			first = false
 			write(exp[2], port)
 			if is_pair(exp[3]) then
@@ -712,13 +667,13 @@ local function eval(exp, env)
 		local val = env[exp]
 		if val then
 			return val
-		else
-			if env[1] then
-				return lookup(exp, env[1])
-			else
-				l_error("No such binding: " .. exp)
-			end
 		end
+
+		if env[1] then
+			return lookup(exp, env[1])
+		end
+
+		l_error("No such binding: " .. exp)
 	end
 
 	local function update(var, val, env)
@@ -736,19 +691,20 @@ local function eval(exp, env)
 		local function evaluate_begin(body, env, cont)
 			if is_nil(body) then
 				return cont(undef_obj)
-			else
-				local exp = car(body)
-				if is_nil(cdr(body)) then
-					return evaluate(exp, env, cont)
-				else
-					return evaluate(exp, env, function (v)
-						return evaluate_begin(cdr(body),
-							env,
-							cont
-						)
-					end)
-				end
 			end
+
+			local exp = car(body)
+			if is_nil(cdr(body)) then
+				return evaluate(exp, env, cont)
+			end
+
+			return evaluate(exp, env, function(v)
+				return evaluate_begin(
+					cdr(body),
+					env,
+					cont
+				)
+			end)
 		end
 
 		-- this is let, not let*, so the bindings are evaluated in the old env,
@@ -756,63 +712,67 @@ local function eval(exp, env)
 		local function evaluate_let(bindings, new_env, env, body, cont)
 			if is_nil(bindings) then
 				return evaluate_begin(body, new_env, cont)
-			else
-				local binding = car(bindings)
-				local var = car(binding)
-				local exp = cadr(binding)
-				if not is_symbol(var) then
-					l_error("Not binding to symbol")
-				end
-
-				return evaluate(exp, env, function(v)
-					new_env[var] = v
-					return evaluate_let(cdr(bindings),
-						new_env,
-						env,
-						body,
-						cont
-					)
-				end)
 			end
+
+			local binding = car(bindings)
+			local var = car(binding)
+			local exp = cadr(binding)
+			if not is_symbol(var) then
+				l_error("Not binding to symbol")
+			end
+
+			return evaluate(exp, env, function(v)
+				new_env[var] = v
+				return evaluate_let(
+					cdr(bindings),
+					new_env,
+					env,
+					body,
+					cont
+				)
+			end)
 		end
 
 		local function evaluate_apply(args, vals, new_env, env, body, cont)
 			if is_nil(args) then
 				return evaluate_begin(body, new_env, cont)
-			else
-				local arg = car(args)
-				local exp = car(vals)
-				if not is_symbol(arg) then
-					l_error("Not binding to symbol")
-				end
-
-				return evaluate(exp, env, function(v)
-					new_env[arg] = v
-					return evaluate_apply(cdr(args),
-						cdr(vals),
-						new_env,
-						env,
-						body,
-						cont
-					)
-				end)
 			end
+
+			local arg = car(args)
+			local exp = car(vals)
+			if not is_symbol(arg) then
+				l_error("Not binding to symbol")
+			end
+
+			return evaluate(exp, env, function(v)
+				new_env[arg] = v
+				return evaluate_apply(
+					cdr(args),
+					cdr(vals),
+					new_env,
+					env,
+					body,
+					cont
+				)
+			end)
 		end
 
 		local function evaluate_primitive(f, args, vals, env, cont)
 			if is_nil(vals) then
 				return cont(f(l_unpack(args)))
-			else
-				local val = car(vals)
-				return evaluate(val, env, function(v)
-					args[#args+1] = v
-					return evaluate_primitive(f, args,
-						cdr(vals),
-						env,
-						cont
-					)
-				end)
 			end
+
+			local val = car(vals)
+			return evaluate(val, env, function(v)
+				args[#args+1] = v
+				return evaluate_primitive(
+					f,
+					args,
+					cdr(vals),
+					env,
+					cont
+				)
+			end)
 		end
 
 		if not is_pair(exp) then
@@ -822,146 +782,154 @@ local function eval(exp, env)
 			else
 				return cont(exp)
 			end
-		else
-			local op = car(exp)
-			if op == "quote" then
-				return cont(cadr(exp))
-			elseif op == "begin" then
-				return evaluate_begin(cdr(exp), env, cont)
-			elseif op == "call/cc" then
-				return evaluate(cadr(exp), env, function(v)
-					local args = procedure_args(v)
-					local fenv = procedure_env(v)
-					local body = procedure_body(v)
-					local proc = make_continuation(cont)
-					local vals = cons(proc, nil_obj)
-					local new_env = {[1] = fenv}
-					return evaluate_apply(args, vals,
-						new_env, env,
-						body, cont
-					)
-				end)
-			elseif op == "define" then
-				local var = cadr(exp)
-				local docstring = caddr(exp)
-				if is_string(docstring) then
-					exp = cdr(exp)
+		end
+
+		local op = car(exp)
+		if op == "quote" then
+			return cont(cadr(exp))
+		elseif op == "begin" then
+			return evaluate_begin(cdr(exp), env, cont)
+		elseif op == "call/cc" then
+			return evaluate(cadr(exp), env, function(v)
+				local args = procedure_args(v)
+				local fenv = procedure_env(v)
+				local body = procedure_body(v)
+				local proc = make_continuation(cont)
+				local vals = cons(proc, nil_obj)
+				local new_env = {[1] = fenv}
+				return evaluate_apply(args, vals,
+					new_env, env,
+					body, cont
+				)
+			end)
+		elseif op == "define" then
+			local var = cadr(exp)
+			local docstring = caddr(exp)
+			if is_string(docstring) then
+				exp = cdr(exp)
+			else
+				docstring = make_string("No documentation available.")
+			end
+			if is_pair(var) then
+				local fname = car(var)
+				local docstring = cadr(var)
+				local args = cdr(var)
+				if is_string (docstring) then
+					args = cddr(var)
 				else
 					docstring = make_string("No documentation available.")
 				end
-				if is_pair(var) then
-					local fname = car(var)
-					local docstring = cadr(var)
-					local args = cdr(var)
-					if is_string (docstring) then
-						args = cddr(var)
-					else
-						docstring = make_string("No documentation available.")
-					end
-					local body = cddr(exp)
-					local proc = make_procedure(args, env, body)
-					proc["doc"] = docstring
-					if not is_symbol(fname) then
-						l_error("Procedure name must be a symbol!")
-					end
-
-					env[fname] = proc
-					return cont(undef_obj)
-				else
-					if not is_symbol(var) then
-						l_error("Assignment to non-symbol!")
-					end
-					return evaluate(caddr(exp), env, function(v)
-						v["doc"] = docstring
-						env[var] = v
-						return cont(undef_obj)
-					end)
-				end
-			elseif op == "if" then
-				return evaluate(cadr(exp),
-					env,
-					function(v)
-						if is_true(v) then
-							return evaluate(caddr(exp), env, cont)
-						else
-							return evaluate(cadddr(exp), env, cont)
-						end
-					end
-				)
-			elseif op == "lambda" then
-				local args = cadr(exp)
 				local body = cddr(exp)
-
-				return cont(make_procedure(args, env, body))
-			elseif op == "let" then
-				local body = cddr(exp)
-				local bindings = cadr(exp)
-
-				if is_nil(bindings) then
-					return evaluate_begin(body, env, cont)
-				elseif is_pair(bindings) then
-					local new_env = {[1] = env}
-
-					return evaluate_let(bindings, new_env, env, body, cont)
-				else
-					l_error("Invalid bindings in let form")
+				local proc = make_procedure(args, env, body)
+				proc["doc"] = docstring
+				if not is_symbol(fname) then
+					l_error("Procedure name must be a symbol!")
 				end
-			elseif op == "set!" then
-				local var = cadr(exp)
+
+				env[fname] = proc
+				return cont(undef_obj)
+			else
 				if not is_symbol(var) then
 					l_error("Assignment to non-symbol!")
 				end
-
 				return evaluate(caddr(exp), env, function(v)
-					update(var, v, env)
+					v["doc"] = docstring
+					env[var] = v
 					return cont(undef_obj)
 				end)
-			else
-				-- function application
-				return evaluate(op, env, function(v)
-					local vals = cdr(exp)
-					if is_continuation(v) then
-						local k = continuation_procedure(v)
-
-						return evaluate(car(vals),
-							env,
-							function(v)
-								return k(v)
-							end
-						)
-					elseif is_procedure(v) then
-						local args = procedure_args(v)
-						local fenv = procedure_env(v)
-						local body = procedure_body(v)
-						local new_env = {[1] = fenv}
-
-						return evaluate_apply(
-							args, vals, new_env,
-							env, body, cont
-						)
-					elseif is_primitive(v) then
-						local num_vals = length(vals)
-						local f = primitive_function(v)
-						local a = primitive_arity(v)
-						if a < 0 or a == num_vals then
-							return evaluate_primitive(
-								f, {}, vals,
-								env, cont
-							)
-						else
-							l_error("Incorrect arity of primitive")
-						end
-					else
-						l_error("Trying to apply non-procedure")
-					end
-				end)
 			end
+		elseif op == "if" then
+			return evaluate(cadr(exp),
+				env,
+				function(v)
+					if is_true(v) then
+						return evaluate(caddr(exp), env, cont)
+					else
+						return evaluate(cadddr(exp), env, cont)
+					end
+				end
+			)
+		elseif op == "lambda" then
+			local args = cadr(exp)
+			local body = cddr(exp)
+
+			return cont(make_procedure(args, env, body))
+		elseif op == "let" then
+			local body = cddr(exp)
+			local bindings = cadr(exp)
+
+			if is_nil(bindings) then
+				return evaluate_begin(body, env, cont)
+			elseif is_pair(bindings) then
+				local new_env = {[1] = env}
+
+				return evaluate_let(bindings, new_env, env, body, cont)
+			else
+				l_error("Invalid bindings in let form")
+			end
+		elseif op == "set!" then
+			local var = cadr(exp)
+			if not is_symbol(var) then
+				l_error("Assignment to non-symbol!")
+			end
+
+			return evaluate(caddr(exp), env, function(v)
+				update(var, v, env)
+				return cont(undef_obj)
+			end)
+		else
+			-- function application
+			return evaluate(op, env, function(v)
+				local vals = cdr(exp)
+				if is_continuation(v) then
+					local k = continuation_procedure(v)
+
+					return evaluate(car(vals),
+						env,
+						function(v)
+							return k(v)
+						end
+					)
+				elseif is_procedure(v) then
+					local args = procedure_args(v)
+					local fenv = procedure_env(v)
+					local body = procedure_body(v)
+					local new_env = {[1] = fenv}
+
+					return evaluate_apply(
+						args, vals, new_env,
+						env, body, cont
+					)
+				elseif is_primitive(v) then
+					local num_vals = length(vals)
+					local f = primitive_function(v)
+					local a = primitive_arity(v)
+					if a >= 0 and a ~= num_vals then
+						l_error("Incorrect arity of primitive")
+					end
+					return evaluate_primitive(
+						f, {}, vals,
+						env, cont
+					)
+				else
+					l_error("Trying to apply non-procedure")
+				end
+			end)
 		end
 	end
 
-	return evaluate(exp, env, function(v) return v end)
+	return evaluate(
+		exp,
+		env,
+		function(v)
+			return v
+		end
+	)
 end
 
+local function add_primitive(name, f, arity)
+	global_env[name] = make_primitive(f, arity)
+end
 add_primitive("=", eq, -1)
 add_primitive("<", lt, -1)
 add_primitive(">", gt, -1)
@@ -979,6 +947,7 @@ add_primitive("length", length, 1)
 add_primitive("write", write, 1)
 add_primitive("newline", newline, 0)
 add_primitive("doc", doc, 1)
+
 --
 -- Module interface
 --
@@ -997,32 +966,36 @@ function load(fname)
 		return
 	end
 
-	status, exp = l_xpcall(function() return read(port) end, l_traceback)
-	if not status then
-		l_io_write("Error: " .. exp .. "\r\n")
-		port:close()
-		return
-	end
-
-	while exp ~= eof_obj do
-
-		status, exp = l_xpcall(function() return eval(exp) end, l_traceback)
+	while true do
+		status, exp = l_xpcall(
+			function()
+				return read(port)
+			end,
+			l_traceback
+		)
 		if not status then
 			l_io_write("Error: " .. exp .. "\r\n")
 			port:close()
 			return
 		end
 
-		status, exp = l_xpcall(function() return read(port) end, l_traceback)
+		if exp == eof_obj then
+			port:close()
+			return
+		end
+
+		status, exp = l_xpcall(
+			function()
+				return eval(exp)
+			end,
+			l_traceback
+		)
 		if not status then
 			l_io_write("Error: " .. exp .. "\r\n")
 			port:close()
 			return
 		end
-
 	end
-
-	port:close()
 end
 
 -- the REPL
@@ -1037,20 +1010,24 @@ function repl()
 			return toplevel()
 		end
 
-		if exp ~= eof_obj then
-
-			status, exp = l_xpcall(function() return eval(exp) end, l_traceback)
-			if not status then
-				l_io_write("Error: " .. exp .. "\r\n")
-				return toplevel()
-			end
-
-			write(exp)
-			l_io_write("\r\n")
-			return toplevel()
-		else
+		if exp == eof_obj then
 			return true
 		end
+
+		status, exp = l_xpcall(
+			function()
+				return eval(exp)
+			end,
+			l_traceback
+		)
+		if not status then
+			l_io_write("Error: " .. exp .. "\r\n")
+			return toplevel()
+		end
+
+		write(exp)
+		l_io_write("\r\n")
+		return toplevel()
 	end
 	return toplevel()
 end
