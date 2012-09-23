@@ -148,6 +148,8 @@
       (make-rename-transformer #'case))
     (define-syntax             #%arity
       (make-rename-transformer #'procedure-arity))
+    (define-syntax             #%quote
+      (make-rename-transformer #'quote))
     ))
   (map (lambda (spec)
          (if (list? spec)
