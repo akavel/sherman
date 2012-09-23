@@ -30,7 +30,14 @@
 ;;; literature without prior written consent from Emergent Technologies,
 ;;; Inc. in each case.
 
-(require-library "synrule.ss")
+(module stream mzscheme
+ (provide
+  list->stream
+  stream->list
+  stream/foldl
+  stream/filter
+  stream/for-each
+  stream/map)
 
 ;; Streams
 (define (stream/make-empty)
@@ -84,3 +91,4 @@
       (stream/foldl f 
                     (f init (stream/car stream))
                     (stream/cdr stream))))
+)

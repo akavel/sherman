@@ -30,9 +30,11 @@
 ;;; literature without prior written consent from Emergent Technologies,
 ;;; Inc. in each case.
 
-(require-library "function.ss")
+(module runtime mzscheme
+ (provide sherman-namespace)
 
-(require-library "block.ss" "sherman")
+(require (lib "etc.ss"))
+(require "block.ss")
 
 (define sherman-runtime-version .5)
 
@@ -109,7 +111,7 @@
 
 (define (prin thing) (display (form thing)))
 
-(define (print thing)
+(define (printt thing)
   (prin thing)
   (display #\newline))
 
@@ -123,14 +125,34 @@
                 (vector-ref vector (+ start i)))))
 
 
-(define sherman-namespace (make-namespace 'keywords))
+(define sherman-namespace (make-namespace 'initial))
 
 (parameterize ((current-namespace sherman-namespace))
-  (require-library "trace.ss")
+  (namespace-transformer-require 'mzscheme)
+  (eval '(begin 
+    (define-syntax             #%define-values
+      (make-rename-transformer #'define-values))
+    (define-syntax             #%values
+      (make-rename-transformer #'values))
+    (define-syntax             #%begin
+      (make-rename-transformer #'begin))
+    (define-syntax             #%set!
+      (make-rename-transformer #'set!))
+    (define-syntax             #%lambda
+      (make-rename-transformer #'lambda))
+    (define-syntax             #%if
+      (make-rename-transformer #'if))
+    (define-syntax             #%procedure?
+      (make-rename-transformer #'procedure?))
+    (define-syntax             #%case
+      (make-rename-transformer #'case))
+    (define-syntax             #%arity
+      (make-rename-transformer #'procedure-arity))
+    ))
   (map (lambda (spec)
          (if (list? spec)
-             (global-defined-value (car spec) (cadr spec))
-             (undefine spec)))
+             (namespace-set-variable-value! (car spec) (cadr spec))
+             (namespace-undefine-variable! spec)))
        `(
          (add             ,+)
          (block!          ,(list->block '(this is the prototype block)))
@@ -165,7 +187,7 @@ Use quit to leave the interpreter")))
          (off             #f)
          (pick            ,block/pick)
          (prin            ,prin)
-         (print           ,print)
+         (print           ,printt)
          (quit            ,exit)
          (random          ,rebol-random)
          (select          ,block/select)
@@ -178,4 +200,4 @@ Use quit to leave the interpreter")))
          ))
 )
 
-
+)

@@ -38,6 +38,16 @@ MIT in each case. |#
 ;; (declare (usual-integrations)
 ;;            (integrate-external "object"))
 
+
+(module tables mzscheme
+ (provide
+  operations/make
+  operations/bind
+  operations/lookup)
+
+;; Compatability
+(define cons* list*)
+
 ;;;; Operations
 
 (define (operations/make)
@@ -56,12 +66,6 @@ MIT in each case. |#
           (if entry
               (if-found (cadr entry) (cddr entry))
               (if-not))))))
-
-(define (operations/shadow operations variables)
-  (cons (map* (car operations)
-              (lambda (variable) (cons variable false))
-              variables)
-        (cdr operations)))
 
 (define (operations/bind operations operation variable value)
   (cons (cons (cons* variable operation value)
@@ -82,3 +86,4 @@ MIT in each case. |#
                  (loop (cdr elements))))
           (else
            (loop (cdr elements))))))
+)

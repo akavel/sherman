@@ -39,6 +39,9 @@
 ;;; keyword versions), because the compiler doesn't use any others.
 ;;; If that is changed, then new code must be added here.
 
+(module free mzscheme
+ (provide free-variable?)
+
 (define (free-variable? name body)
   (cond ((eq? name body) #t)
         ((pair? body) (let ((handler (assq (car body) free-variable-special-forms)))
@@ -85,3 +88,4 @@
         (LET      ,free-variable/let)
         (#%LET    ,free-variable/let)
         ))
+)

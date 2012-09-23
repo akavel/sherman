@@ -30,6 +30,14 @@
 ;;; literature without prior written consent from Emergent Technologies,
 ;;; Inc. in each case.
 
+(module set mzscheme
+ (provide
+  set->list
+  stream->set
+  set/cardinality)
+
+(require "stream.ss")
+
 ;; Sets
 ;; Sets are represented as lists compared with eq
 (define (set/make-empty) '())
@@ -47,3 +55,4 @@
 
 (define (set/cardinality set)
   (length set))
+)

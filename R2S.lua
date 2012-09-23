@@ -117,6 +117,7 @@ local rebol = P{
 		P'}',
 }
 
+write '(require "collects/sherman/block.ss")\n'
 write '`(SHERMAN ,(LIST->BLOCK `('
 local success = rebol:match(code)
 if not success then

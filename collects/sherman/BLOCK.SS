@@ -30,9 +30,36 @@
 ;;; literature without prior written consent from Emergent Technologies,
 ;;; Inc. in each case.
 
-(require-library "functios.ss")
-(require-library "synrule.ss")
-(require-library "stream.ss" "sherman")
+(module block mzscheme
+ (provide
+  block?
+  block->stream
+  list->block
+  block->list
+  block/copy
+  block/find
+  block/first
+  block/second
+  block/third
+  block/fourth
+  block/head
+  block/tail
+  block/rest
+  block/pick
+  block/length
+  block/select
+  block/skip
+  block/empty?
+  block/tail?
+  block/clear!
+  block/insert!
+  block/insert-part!
+  block/splice!
+  block/set-n!
+  block/set-first!)
+
+(require (lib "list.ss"))
+(require "stream.ss")
 
 ;;; Blocks are fundamentally based on linked lists.  The data
 ;;; structure handed to the user contains a pointer to the first
@@ -184,3 +211,4 @@
 (define (block/tail? block)
   (null? (cddr block)))
 
+)

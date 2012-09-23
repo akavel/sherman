@@ -30,22 +30,25 @@
 ;;; literature without prior written consent from Emergent Technologies,
 ;;; Inc. in each case.
 
-(require-library "compat.ss")
-(require-library "compile.ss")
-(require-library "file.ss")
-(require-library "pretty.ss")
-(require-library "synrule.ss")
+(module sherman mzscheme
+ (provide sherman)
 
-(require-library "free.ss"   "sherman")
-(require-library "block.ss"  "sherman")
-(require-library "set.ss"    "sherman")
-(require-library "tables.ss" "sherman")
+(require (lib "compile.ss"))
+(require (lib "file.ss"))
+(require (lib "pretty.ss"))
+(require (lib "etc.ss"))
+(require (lib "process.ss"))
+
+
+(require "free.ss")
+(require "block.ss")
+(require "set.ss")
+(require "tables.ss")
+(require "stream.ss")
 
 
 ;; Compatability
 (define -1+ sub1)
-
-(define cons* list*)
 
 (define (complement f)
   (lambda (x) (not (f x))))
@@ -126,11 +129,6 @@
 
 (define (combination/make operator operands)
   `(,operator ,@operands))
-
-(define (conditional/make predicate consequence alternative)
-  `(#%IF ,predicate
-       ,consequence
-       ,alternative))
 
 (define (dangling-else/make)
   `(#%ERROR "Danging else."))
@@ -292,9 +290,6 @@
 
 (define (environment/bind environment variable value)
   (cons (cons variable value) environment))
-
-(define (environment/bind-multiple environment variables values)
-  (map* environment cons variables values))
 
 (define (environment/lookup environment variable if-found if-unknown if-not)
   (let ((association (assq variable environment)))
@@ -1018,3 +1013,4 @@
            (translate-file compile-file source compiled)
            (sherman compiled)))
         (else #t)))
+)
