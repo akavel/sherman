@@ -1,11 +1,6 @@
 
 require 'lpeg'
 
---[[
-The BOGUS types generally match illegal trailing context so as to avoid
-having things like  foo12:22:33bar get split into three tokens.
-]]
-
 function parse(code)
 
 -- LPEG shorthands

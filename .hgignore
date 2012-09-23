@@ -1,0 +1,5 @@
+syntax: glob
+*.rs
+*.zo
+syntax: regexp
+^[^/]*\.ss$
