@@ -53,3 +53,58 @@ It's a bit ugly, but it is a legal Scheme backquoted list.
 Carl abandoned my implementation after I left Rebol Technologies. He completely rewrote the interpreter and, in the process, substantially changed the semantics of the language. Rebol 2.0 is a quirky and bizarre language. I don't see any opportunity in the language so I never tried to write a compiler for Carl's semantics. Rebol seems to still be popular in France, but I think the company has shrunk down to be just Carl and his wife.
 
 _[Joe Marshall](http://code.google.com/p/jrm-code-project/wiki/BitsAndPieces)_
+
+------
+
+## How to use this project
+
+Below, I collected information which should help you if you want to experiment with this project. Please note this is mostly this, *an experiment* at this moment, so the procedure is not very user-friendly. Enough smalltalk (uhm...) - hackery galore ensues! :P
+
+### Prepare
+
+  * **Download MzScheme** (part of PLT-Scheme project), **version 103p1** (or some older, any version between 52 and 103p1 might work) for your OS from: http://download.plt-scheme.org/mzscheme/all-versions.html then unzip somewhere (for example, to `c:\plt`).
+  * (Obviously, download contents of this project.)
+  * Open shell (on Windows, [Win]+[R], then type `cmd`), then `cd PATH_TO_SHERMAN`
+  * Set up environment. On Windows:
+<pre>
+set PATH=c:\plt;%PATH%
+set PLTCOLLECTS=%CD%\collects;c:\plt\collects
+</pre>
+
+### Compile your Rebol 1.0 code
+
+To run any file with `.r` extension using this project, a multistep translation (compilation) must be first performed. Running `sherman.bat compile trivial.r` tries to transform the file in following steps:
+
+  * `trivial.r` - this is an example program in "Rebol 1.0" (or rather, Sherman) source code.
+     * Calling `sherman.bat compile trivial.r` tries internally to run `r2s < trivial.r > trivial.rs`. Now, `r2s.exe` seems to ask for Cygwin, and according to Joe's note, is somewhat broken (?). Anyway, for me, this step fails. Source code for [flex lexer generator](http://en.wikipedia.org/wiki/Flex_lexical_analyser) is provided in `r2s.l`, but I didn't try to compile with MinGW.
+     * So, Joe provided initially pre-processed files for the sample programs, with `.s` extension. So, to workaround this step, you can run: `copy trivial.s trivial.rs`.
+     * Alternatively, I started work porting `r2s.l` to [Lua](http://www.lua.org/)'s [LPEG](http://www.inf.puc-rio.br/~roberto/lpeg/) library. It's only very initial code, but I tried to make it work for the provided sample programs, so if you want to do this step the funny way, and you have Lua + LPEG installed, you can run: `lua r2s.lua < trivial.r > trivial.rs`.
+  * `trivial.rs` - this is result of first step of compilation, and this seems to be a simplest form that is digestible to Scheme parser, so that it can be loaded as "Scheme data tree", or something like that (in current day's buzzwords, you might think of it like what JSON is for JavaScript).
+     * `sherman.bat compile trivial.rs` processes this further and generates:
+  * `trivial.ss` - this is result of second step of compilation. This seems to be a regular, correct Scheme program, only it references lots of functions from some weird nonstandard library ("sherman namespace").
+     * the next progression should work automatically, but if you need to start from previous step explicitly, you can call `sherman.bat compile trivial.ss`.
+  * `trivial.zo` - this is result of third step of compilation. This seems to be a binary bytecode form of the `trivial.ss` program, compiled solely by MzScheme (see also: [some pdf about mzc compiler](http://download.plt-scheme.org/doc/371/pdf/mzc.pdf)).
+
+### Run the compiled code
+
+Now, after you got your program compiled (as described above), to run it, you can call either:
+  * `sherman.bat run trivial.zo`, or:
+  * `sherman.bat run trivial.ss`, whichever you prefer.
+
+Voilà! *Works For Me&trade;!* ;)
+
+Expected output:
+
+<pre>
+Sherman runtime version 0.5
+Hosted on MzScheme version 103, Copyright (c) 1995-2000 PLT (Matthew Flatt)
+Hello world!
+3 + 3 =6
+>
+</pre>
+
+(on Windows, quit with: [Ctrl-Z], [Enter])
+
+Have fun!
+
+*Big thanks to [soegaard, for helping me to make this work](http://stackoverflow.com/a/12551836/98528). --Mateusz Czapliński, 2012*
